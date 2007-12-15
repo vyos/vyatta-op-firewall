@@ -1,0 +1,3 @@
+help: Show firewall rules (summary output)
+run: ${vyatta_sbindir}/vyatta-show-firewall.pl $3 /opt/vyatta/xsl/show_firewall.xsl
+

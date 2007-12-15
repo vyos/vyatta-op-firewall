@@ -1,0 +1,2 @@
+vyatta-op-firewall: file-in-unusual-dir
+vyatta-op-firewall: dir-or-file-in-opt

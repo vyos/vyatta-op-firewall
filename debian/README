@@ -1,0 +1,7 @@
+The Debian Package vyatta-op-firewall
+-------------------------------------
+
+This package has the CLI template for the "show firewall" command
+
+
+ -- Bob Gilligan <gilligan@vyatta.com> Wed 12 Dec 2007

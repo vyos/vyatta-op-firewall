@@ -1,0 +1,3 @@
+help: Show firewall information
+run: ${vyatta_sbindir}/vyatta-show-firewall.pl --all /opt/vyatta/xsl/show_firewall.xsl
+

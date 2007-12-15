@@ -1,0 +1,18 @@
+Source: vyatta-op-firewall
+Section: contrib/net
+Priority: extra
+Maintainer: Bob Gilligan <gilligan@vyatta.com>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: vyatta-op-firewall
+Architecture: all
+Depends: bash (>= 3.1),
+ vyatta-op
+Suggests: util-linux (>= 2.13-5),
+ net-tools,
+ ethtool,
+ ncurses-bin (>= 5.5-5),
+ ntpdate
+Description: Vyatta operational commands for firewall.
+ Vyatta operational commands for firewall.

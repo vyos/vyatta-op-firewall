@@ -1,0 +1,5 @@
+vyatta-op-firewall (0.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Bob Gilligan <gilligan@vyatta.co>  Wed, 12 Nov 2007 15:29:15 -0700
