@@ -75,13 +75,13 @@ if ($chain_name eq "-all") {
   my @chains = $config->listOrigNodes();
   foreach (@chains) {
     print "Firewall \"$_\":\n";
-    open(RENDER, "| /opt/vyatta/libexec/xorp/render_xml $xsl_file") or exit 1;
+    open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
     show_chain($_, *RENDER{IO});
     close RENDER;
     print "-" x 80 . "\n";
   }
 } else {
-  open(RENDER, "| /opt/vyatta/libexec/xorp/render_xml $xsl_file") or exit 1;
+  open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
   show_chain($chain_name, *RENDER{IO});
   close RENDER;
 }

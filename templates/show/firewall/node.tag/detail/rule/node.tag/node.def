@@ -1,3 +1,4 @@
-help: Show firewall rules (detail output)
-run: ${vyatta_sbindir}/vyatta-show-firewall.pl $3 /opt/vyatta/xsl/show_firewall_tail.xsl $6
+help: Show detailed information about one firewall rule
+allowed: echo -n "<NUMBER>"
+run: ${vyatta_sbindir}/vyatta-show-firewall.pl $3 /opt/vyatta/share/xsl/show_firewall_detail.xsl $6
 
