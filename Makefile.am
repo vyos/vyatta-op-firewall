@@ -2,10 +2,11 @@ opdir		 = $(datadir)/vyatta-op/templates
 
 xsldir          = @XSLDIR@
 
-sbin_SCRIPTS =
+bin_sudo_usersdir = $(bindir)/sudo-users
+
 xsl_DATA =
 
-sbin_SCRIPTS += scripts/firewall/vyatta-show-firewall.pl
+bin_sudo_users_SCRIPTS = scripts/firewall/vyatta-show-firewall.pl
 
 xsl_DATA        += src/xsl/show_firewall_detail.xsl
 xsl_DATA        += src/xsl/show_firewall_statistics_brief.xsl

@@ -16,7 +16,7 @@ sub show_chain {
   my $chain = shift;
   my $fh = shift;
 
-  open(STATS, "iptables -L $chain -vn |") or exit 1;
+  open(STATS, "/sbin/iptables -L $chain -vn |") or exit 1;
   my @stats = ();
   while (<STATS>) {
     if (!/^\s*(\d+[KMG]?)\s+(\d+[KMG]?)\s/) {
