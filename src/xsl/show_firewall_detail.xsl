@@ -135,18 +135,8 @@
 <xsl:text>  Ports: </xsl:text>
 
   <xsl:choose>
-    <xsl:when test="src_port_num!='0'">
-      <xsl:value-of select="src_port_num"/>
-    </xsl:when>
-
-    <xsl:when test="src_port_start!='0'">
-      <xsl:value-of select="src_port_start"/>
-      <xsl:text>:</xsl:text>
-      <xsl:value-of select="src_port_stop"/>
-    </xsl:when>
-
-    <xsl:when test="src_port_name!=''">
-      <xsl:value-of select="src_port_name"/>
+    <xsl:when test="src_port!=''">
+      <xsl:value-of select="src_port"/>
     </xsl:when>
 
     <xsl:otherwise>
@@ -181,18 +171,8 @@
 <xsl:text>  Ports: </xsl:text>
 
   <xsl:choose>
-    <xsl:when test="dst_port_num!='0'">
-      <xsl:value-of select="dst_port_num"/>
-    </xsl:when>
-
-    <xsl:when test="dst_port_start!='0'">
-      <xsl:value-of select="dst_port_start"/>
-      <xsl:text>:</xsl:text>
-      <xsl:value-of select="dst_port_stop"/>
-    </xsl:when>
-
-    <xsl:when test="dst_port_name!=''">
-      <xsl:value-of select="dst_port_name"/>
+    <xsl:when test="dst_port!=''">
+      <xsl:value-of select="dst_port"/>
     </xsl:when>
 
     <xsl:otherwise>
