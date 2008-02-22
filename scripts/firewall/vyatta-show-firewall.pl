@@ -10,6 +10,16 @@ my $chain_name = $ARGV[0];
 my $xsl_file = $ARGV[1];
 my $rule_num = $ARGV[2];    # rule number to match (optional)
 
+if (! -e $xsl_file) {
+  print "Invalid XSL file \"$xsl_file\"\n";
+  exit 1;
+}
+
+if (defined($rule_num) && (!($rule_num =~ /^\d+$/) || ($rule_num > 1025))) {
+  print "Invalid rule number \"$rule_num\"\n";
+  exit 1;
+}
+
 sub numerically { $a <=> $b; }
 
 sub show_chain {
@@ -69,10 +79,10 @@ sub show_chain {
   print $fh "</format></opcommand>\n";
 }
 
+my $config = new VyattaConfig;
+$config->setLevel("firewall name");
+my @chains = $config->listOrigNodes();
 if ($chain_name eq "-all") {
-  my $config = new VyattaConfig;
-  $config->setLevel("firewall name");
-  my @chains = $config->listOrigNodes();
   foreach (@chains) {
     print "Firewall \"$_\":\n";
     open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
@@ -81,6 +91,10 @@ if ($chain_name eq "-all") {
     print "-" x 80 . "\n";
   }
 } else {
+  if (scalar(grep(/^$chain_name$/, @chains)) <= 0) {
+    print "Invalid name \"$chain_name\"\n";
+    exit 1;
+  }
   open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
   show_chain($chain_name, *RENDER{IO});
   close RENDER;
