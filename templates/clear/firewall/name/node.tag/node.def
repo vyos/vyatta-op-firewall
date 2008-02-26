@@ -1,2 +1,2 @@
 help: Clear firewall rules for a given chain
-allowed:  /sbin/iptables --list -n | /bin/grep ^Chain | /usr/bin/awk '{ print $2 }'
+allowed: sudo ${vyatta_bindir}/sudo-users/iptables --list -n | /bin/grep ^Chain | /usr/bin/awk '{ print $2 }'
