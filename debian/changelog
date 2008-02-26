@@ -1,3 +1,18 @@
+vyatta-op-firewall (0.2) unstable; urgency=low
+
+  vc4.0.0
+  [ Mark O'Brien ]
+
+
+  [ An-Cheng Huang ]
+  * merge ports in show output
+  * add error checking for show command
+  * fix quoting in show command templates
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@vyatta.com>  Mon, 25 Feb 2008 17:39:14 -0800
+
 vyatta-op-firewall (0.1) unstable; urgency=low
 
   * Initial Release.
