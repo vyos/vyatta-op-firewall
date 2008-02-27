@@ -147,52 +147,22 @@
 
   <xsl:text>&newln;</xsl:text>
 
-  <xsl:if test="src_port_num!='' or src_port_name!='' or src_port_start!=''">
+  <xsl:if test="src_port!=''">
     <xsl:value-of select="$pad6"/>
     <xsl:value-of select="$pad8"/>
     <xsl:text>src ports: </xsl:text>
-    <xsl:if test="src_port_num!=''">
-      <xsl:value-of select="src_port_num"/>
-      <xsl:if test="src_port_name!='' or src_port_start!=''">
-        <xsl:text>,</xsl:text>
-      </xsl:if>
-    </xsl:if>
-    <xsl:if test="src_port_name!=''">
-      <xsl:value-of select="src_port_name"/>
-      <xsl:if test="src_port_start!=''">
-        <xsl:text>,</xsl:text>
-      </xsl:if>
-    </xsl:if>
-    <xsl:if test="src_port_start!=''">
-      <xsl:value-of select="src_port_start"/>
-      <xsl:text>-</xsl:text>
-      <xsl:value-of select="src_port_stop"/>
-    </xsl:if>
+    <xsl:value-of select="src_port"/>
+
     <xsl:text>&newln;</xsl:text>
   </xsl:if>
   
-  <xsl:if test="dst_port_num!='' or dst_port_name!='' or dst_port_start!=''">
+  <xsl:if test="dst_port!=''">
     <xsl:value-of select="$pad6"/>
     <xsl:value-of select="$pad8"/>
     <xsl:value-of select="$pad20"/>
     <xsl:text>dst ports: </xsl:text>
-    <xsl:if test="dst_port_num!=''">
-      <xsl:value-of select="dst_port_num"/>
-      <xsl:if test="dst_port_name!='' or dst_port_start!=''">
-        <xsl:text>,</xsl:text>
-      </xsl:if>
-    </xsl:if>
-    <xsl:if test="dst_port_name!=''">
-      <xsl:value-of select="dst_port_name"/>
-      <xsl:if test="dst_port_start!=''">
-        <xsl:text>,</xsl:text>
-      </xsl:if>
-    </xsl:if>
-    <xsl:if test="dst_port_start!=''">
-      <xsl:value-of select="dst_port_start"/>
-      <xsl:text>-</xsl:text>
-      <xsl:value-of select="dst_port_stop"/>
-    </xsl:if>
+    <xsl:value-of select="dst_port"/>
+
     <xsl:text>&newln;</xsl:text>
   </xsl:if>
 

@@ -1,4 +1,4 @@
 help: Show firewall rules for given chain
 allowed: sudo ${vyatta_bindir}/sudo-users/iptables --list -n | /bin/grep ^Chain | /usr/bin/awk '{ print $2 }'
-run: sudo ${vyatta_bindir}/sudo-users/vyatta-show-firewall.pl $3 /opt/vyatta/share/xsl/show_firewall.xsl
+run: sudo ${vyatta_bindir}/sudo-users/vyatta-show-firewall.pl "$3" /opt/vyatta/share/xsl/show_firewall.xsl
 

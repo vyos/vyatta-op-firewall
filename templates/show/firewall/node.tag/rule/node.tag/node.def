@@ -1,4 +1,4 @@
 help: Show firewall rules (summary output)
 allowed: echo -n "<NUMBER>"
-run: sudo ${vyatta_bindir}/sudo-users/vyatta-show-firewall.pl $3 /opt/vyatta/share/xsl/show_firewall.xsl $5
+run: sudo ${vyatta_bindir}/sudo-users/vyatta-show-firewall.pl "$3" /opt/vyatta/share/xsl/show_firewall.xsl "$5"
 
