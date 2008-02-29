@@ -26,15 +26,17 @@ sub show_chain {
   my $chain = shift;
   my $fh = shift;
 
-  open(STATS, "/sbin/iptables -L $chain -vn |") or exit 1;
+  open my $iptables, "-|"
+      or exec "sudo", "/sbin/iptables", "-L", $chain, "-vn"
+      or exit 1;
   my @stats = ();
-  while (<STATS>) {
+  while (<$iptables>) {
     if (!/^\s*(\d+[KMG]?)\s+(\d+[KMG]?)\s/) {
       next;
     }
     push @stats, ($1, $2);
   }
-  close STATS;
+  close $iptables;
 
   print $fh "<opcommand name='firewallrules'><format type='row'>\n";
   my $config = new VyattaConfig;
