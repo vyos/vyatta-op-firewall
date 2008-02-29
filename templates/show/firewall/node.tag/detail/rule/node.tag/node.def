@@ -1,4 +1,4 @@
 help: Show detailed information about one firewall rule
 allowed: echo -n "<NUMBER>"
-run: sudo ${vyatta_bindir}/sudo-users/vyatta-show-firewall.pl "$3" /opt/vyatta/share/xsl/show_firewall_detail.xsl "$6"
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3" /opt/vyatta/share/xsl/show_firewall_detail.xsl "$6"
 
