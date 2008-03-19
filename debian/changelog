@@ -1,3 +1,22 @@
+vyatta-op-firewall (0.3) unstable; urgency=low
+
+  3.0.1
+  [ Mark O'Brien ]
+
+
+  [ An-Cheng Huang ]
+  * add quoting for inline scripts in templates
+
+  [ Stephen Hemminger ]
+  * use exec rather than open with path
+  * convert to using iptables directly
+  * Replace VPL with GPLv2
+  * update from VPL1.0 to GPLv2
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@vyatta.com>  Tue, 18 Mar 2008 19:04:43 -0700
+
 vyatta-op-firewall (0.2) unstable; urgency=low
 
   vc4.0.0
