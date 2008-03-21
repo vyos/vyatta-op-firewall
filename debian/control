@@ -7,8 +7,8 @@ Standards-Version: 3.7.2
 
 Package: vyatta-op-firewall
 Architecture: all
-Depends: bash (>= 3.1),
- vyatta-op,
+Depends: vyatta-op,
+ vyatta-bash,
  vyatta-op-xml
 Suggests: util-linux (>= 2.13-5),
  net-tools,
