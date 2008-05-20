@@ -11,6 +11,7 @@
 /configure
 /debian/files
 /debian/vyatta-op-firewall
+/debian/vyatta-op-firewall.debhelper.log
 /INSTALL
 /Makefile.in
 /Makefile
