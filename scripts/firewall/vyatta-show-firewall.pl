@@ -22,6 +22,51 @@ if (defined($rule_num) && (!($rule_num =~ /^\d+$/) || ($rule_num > 1025))) {
 
 sub numerically { $a <=> $b; }
 
+### all interfaces firewall nodes
+#/ethernet/node.tag/pppoe/node.tag/firewall/<dir>/name/node.def
+#/ethernet/node.tag/vif/node.tag/firewall/<dir>/name/node.def
+#/ethernet/node.tag/firewall/<dir>/name/node.def
+#/adsl/node.tag/pvc/node.tag/pppoa/node.tag/firewall/<dir>/name/node.def
+#/adsl/node.tag/pvc/node.tag/pppoe/node.tag/firewall/<dir>/name/node.def
+#/adsl/node.tag/pvc/node.tag/classical-ipoa/firewall/<dir>/name/node.def
+#/tunnel/node.tag/firewall/<dir>/name/node.def
+#/serial/node.tag/cisco-hdlc/vif/node.tag/firewall/<dir>/name/node.def
+#/serial/node.tag/frame-relay/vif/node.tag/firewall/<dir>/name/node.def
+#/serial/node.tag/ppp/vif/node.tag/firewall/<dir>/name/node.def
+
+sub show_interfaces {
+  my $chain = shift;
+  my $cmd = "find /opt/vyatta/config/active/ "
+            . "|grep -e '/firewall/[^/]\\+/name/node.val'"
+            . "| xargs grep -l '^$chain\$'";
+  my $ifd;
+  return if (!open($ifd, "$cmd |"));
+  my @ints = <$ifd>;
+  # e.g.,
+  #/opt/vyatta/config/active/interfaces/ethernet/eth1/firewall/in/name/node.val
+  my $pfx = '/opt/vyatta/config/active/interfaces';
+  my $sfx = '/name/node.val';
+  my @int_strs = ();
+  foreach (@ints) {
+    my ($intf, $vif, $dir) = (undef, undef, undef);
+    if (/^$pfx\/[^\/]+\/([^\/]+)(\/.*)?\/firewall\/([^\/]+)$sfx$/) {
+      ($intf, $dir) = ($1, $3);
+      $dir =~ y/a-z/A-Z/;
+    } else {
+      next;
+    }
+    if (/\/vif\/([^\/]+)\/firewall\//) {
+      $vif = $1;
+      push @int_strs, "($intf.$vif,$dir)";
+    } else {
+      push @int_strs, "($intf,$dir)";
+    }
+  }
+  if (scalar(@int_strs) > 0) {
+    print "\nActive on " . (join ' ', @int_strs) . "\n";
+  }
+}
+
 sub show_chain {
   my $chain = shift;
   my $fh = shift;
@@ -87,6 +132,7 @@ my @chains = $config->listOrigNodes();
 if ($chain_name eq "-all") {
   foreach (@chains) {
     print "Firewall \"$_\":\n";
+    show_interfaces($_);
     open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
     show_chain($_, *RENDER{IO});
     close RENDER;
@@ -97,6 +143,7 @@ if ($chain_name eq "-all") {
     print "Invalid name \"$chain_name\"\n";
     exit 1;
   }
+  show_interfaces($chain_name);
   open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
   show_chain($chain_name, *RENDER{IO});
   close RENDER;
