@@ -1,2 +1,2 @@
 help: Clear firewall rules for a given chain
-allowed: /sbin/iptables --list -n | /bin/grep ^Chain | /usr/bin/awk '{ print $2 }'
+allowed: ls /opt/vyatta/config/active/firewall/name/ 2>/dev/null
