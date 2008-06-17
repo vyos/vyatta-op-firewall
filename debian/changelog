@@ -1,3 +1,31 @@
+vyatta-op-firewall (0.10) unstable; urgency=low
+
+	  3.1.0
+  [ Mark O'Brien ]
+
+
+  [ An-Cheng Huang ]
+  * fix for bug 3156: only show configured names as completions.
+  * fix for bug 3061: show interface information if a "chain" is active.
+  * fix for bug 3301: only show configured names as completions.
+
+  [ rbalocca ]
+  * Ignore derived files
+  * Convert to our method of changelog creation
+
+  [ Mohit Mehta ]
+  * Fix Bug 3069 Help strings should be standardized
+
+  [ Stephen Hemminger ]
+  * convert to using iptables directly
+  * use exec rather than open with path
+  * hold off this change until after Alpha 2 build
+  * elminate use of sudo for iptables -L
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Tue, 17 Jun 2008 09:27:05 -0700
+
 vyatta-op-firewall (0.9) unstable; urgency=low
 
   3.0.5
