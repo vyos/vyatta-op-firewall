@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 
 use lib "/opt/vyatta/share/perl5/";
-use VyattaConfig;
-use VyattaIpTablesRule;
-use VyattaIpTablesAddressFilter;
+use Vyatta::Config;
+use Vyatta::IpTables::Rule;
+use Vyatta::IpTables::AddressFilter;
 
 exit 1 if ($#ARGV < 1);
 my $chain_name = $ARGV[0];
@@ -84,7 +84,7 @@ sub show_chain {
   close $iptables;
 
   print $fh "<opcommand name='firewallrules'><format type='row'>\n";
-  my $config = new VyattaConfig;
+  my $config = new Vyatta::Config;
   $config->setLevel("firewall name $chain rule");
   my @rules = sort numerically $config->listOrigNodes();
   foreach (@rules) {
@@ -95,7 +95,7 @@ sub show_chain {
     # instead of just taking the first pair.
     my $pkts = shift @stats;
     my $bytes = shift @stats;
-    my $rule = new VyattaIpTablesRule;
+    my $rule = new Vyatta::IpTables::Rule;
     $rule->setupOrig("firewall name $chain rule $_");
     my $ipt_rules = $rule->get_num_ipt_rules();
     splice(@stats, 0, (($ipt_rules - 1) * 2));
@@ -118,7 +118,7 @@ sub show_chain {
     my $bytes = shift @stats;
     print $fh "    <pkts>$pkts</pkts>\n";
     print $fh "    <bytes>$bytes</bytes>\n";
-    my $rule = new VyattaIpTablesRule;
+    my $rule = new Vyatta::IpTables::sRule;
     $rule->setupDummy();
     $rule->outputXml($fh);
     print $fh "  </row>\n";
@@ -126,7 +126,7 @@ sub show_chain {
   print $fh "</format></opcommand>\n";
 }
 
-my $config = new VyattaConfig;
+my $config = new Vyatta::Config;
 $config->setLevel("firewall name");
 my @chains = $config->listOrigNodes();
 if ($chain_name eq "-all") {
