@@ -118,7 +118,7 @@ sub show_chain {
     my $bytes = shift @stats;
     print $fh "    <pkts>$pkts</pkts>\n";
     print $fh "    <bytes>$bytes</bytes>\n";
-    my $rule = new Vyatta::IpTables::sRule;
+    my $rule = new Vyatta::IpTables::Rule;
     $rule->setupDummy();
     $rule->outputXml($fh);
     print $fh "  </row>\n";
