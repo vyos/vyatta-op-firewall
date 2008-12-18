@@ -64,6 +64,8 @@ sub show_interfaces {
   }
   if (scalar(@int_strs) > 0) {
     print "\nActive on " . (join ' ', @int_strs) . "\n";
+  } else {
+      print "\nInactive: Not applied to any interfaces.\n";
   }
 }
 
