@@ -105,6 +105,7 @@ sub show_chain {
     if (defined($rule_num) && $rule_num != $_) {
       next;
     }
+    next if $rule->is_disabled();
     print $fh "  <row>\n";
     print $fh "    <rule_number>$_</rule_number>\n";
     print $fh "    <pkts>$pkts</pkts>\n";
