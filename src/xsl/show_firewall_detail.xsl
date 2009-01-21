@@ -117,7 +117,7 @@
       <xsl:value-of select="src_addr"/>
     </xsl:when>
 
-    <xsl:when test="src_net!='' and src_addr!='0.0.0.0/0'">
+    <xsl:when test="src_net!='' and src_net!='0.0.0.0/0'">
       <xsl:value-of select="src_net"/>
     </xsl:when>
 
@@ -153,7 +153,7 @@
       <xsl:value-of select="dst_addr"/>
     </xsl:when>
 
-    <xsl:when test="dst_net!='' and dst_addr!='0.0.0.0/0'">
+    <xsl:when test="dst_net!='' and dst_net!='0.0.0.0/0'">
       <xsl:value-of select="dst_net"/>
     </xsl:when>
 

@@ -68,7 +68,7 @@
       <xsl:value-of select="substring($pad20,1,$pad20_len - string-length(src_addr))"/>
     </xsl:when>
     
-    <xsl:when test="src_net!='' and src_addr!='0.0.0.0/0'">
+    <xsl:when test="src_net!='' and src_net!='0.0.0.0/0'">
       <xsl:value-of select="src_net"/>
       <xsl:value-of select="substring($pad20,1,$pad20_len - string-length(src_net))"/>
     </xsl:when>
@@ -89,7 +89,7 @@
       <xsl:value-of select="substring($pad20,1,$pad20_len - string-length(dst_addr))"/>
     </xsl:when>
     
-    <xsl:when test="dst_net!='' and dst_addr!='0.0.0.0/0'">
+    <xsl:when test="dst_net!='' and dst_net!='0.0.0.0/0'">
       <xsl:value-of select="dst_net"/>
       <xsl:value-of select="substring($pad20,1,$pad20_len - string-length(dst_net))"/>
     </xsl:when>
