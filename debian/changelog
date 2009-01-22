@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.3) unstable; urgency=low
+
+  * Initial support for IPv6.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Thu, 22 Jan 2009 15:58:26 -0800
+
 vyatta-op-firewall (0.10.2) unstable; urgency=low
 
   [ Stig Thormodsrud ]
