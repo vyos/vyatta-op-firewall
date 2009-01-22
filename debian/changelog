@@ -1,3 +1,10 @@
+vyatta-op-firewall (0.10.2) unstable; urgency=low
+
+  [ Stig Thormodsrud ]
+  * Fix 4054: "show firewall" doesn't match configurationZ
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Thu, 22 Jan 2009 13:43:38 -0800
+
 vyatta-op-firewall (0.10.1) unstable; urgency=low
 
   [ An-Cheng Huang ]
