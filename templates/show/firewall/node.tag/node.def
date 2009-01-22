@@ -1,4 +1,11 @@
 help: Show firewall rules for given chain
-allowed: ls /opt/vyatta/config/active/firewall/name/ 2>/dev/null
+
+allowed: 
+     l1=`ls /opt/vyatta/config/active/firewall/name/ 2>/dev/null`
+     l2=`ls /opt/vyatta/config/active/firewall/ipv6-name/ 2>/dev/null`
+     l3=`ls /opt/vyatta/config/active/firewall/modify/ 2>/dev/null`
+     l4=`ls /opt/vyatta/config/active/firewall/ipv6-modify/ 2>/dev/null`
+     echo $l1 $l2 $l3 $l3
+
 run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3" /opt/vyatta/share/xsl/show_firewall.xsl
 

@@ -69,12 +69,33 @@ sub show_interfaces {
   }
 }
 
-sub show_chain {
-  my $chain = shift;
-  my $fh = shift;
+# mapping from config node to iptables/ip6tables table
+my %table_hash = ( 'name'        => 'filter',
+                   'ipv6-name'   => 'filter',
+                   'modify'      => 'mangle',
+                   'ipv6-modify' => 'mangle' );
+
+# mapping from config node to iptables command. 
+my %cmd_hash = ( 'name'        => 'iptables',
+                 'ipv6-name'   => 'ip6tables',
+                 'modify'      => 'iptables',
+                 'ipv6-modify' => 'ip6tables');
+
+# mapping from config node to printable string describing it.
+my %description_hash = ( 'name'        => 'IPv4',
+                         'ipv6-name'   => 'IPv6',
+                         'modify'      => 'IPv4 Modify',
+                         'ipv6-modify' => 'IPv6 Modify');
+
+
+sub show_chain($$$) {
+  my ($chain, $fh, $tree) = @_;
+
+  my $table = $table_hash{$tree};
+  my $iptables_cmd = $cmd_hash{$tree};
 
   open my $iptables, "-|"
-      or exec "sudo", "/sbin/iptables", "-L", $chain, "-vn"
+      or exec "sudo", "/sbin/$iptables_cmd", "-t", $table, "-L", $chain, "-vn"
       or exit 1;
   my @stats = ();
   while (<$iptables>) {
@@ -87,7 +108,7 @@ sub show_chain {
 
   print $fh "<opcommand name='firewallrules'><format type='row'>\n";
   my $config = new Vyatta::Config;
-  $config->setLevel("firewall name $chain rule");
+  $config->setLevel("firewall $tree $chain rule");
   my @rules = sort numerically $config->listOrigNodes();
   foreach (@rules) {
     # just take the stats from the 1st iptables rule and remove unneeded stats
@@ -98,7 +119,7 @@ sub show_chain {
     my $pkts = shift @stats;
     my $bytes = shift @stats;
     my $rule = new Vyatta::IpTables::Rule;
-    $rule->setupOrig("firewall name $chain rule $_");
+    $rule->setupOrig("firewall $tree $chain rule $_");
     my $ipt_rules = $rule->get_num_ipt_rules();
     splice(@stats, 0, (($ipt_rules - 1) * 2));
 
@@ -129,28 +150,51 @@ sub show_chain {
   print $fh "</format></opcommand>\n";
 }
 
+my $tree;
 my $config = new Vyatta::Config;
-$config->setLevel("firewall name");
-my @chains = $config->listOrigNodes();
+my @chains;
+
 if ($chain_name eq "-all") {
-  foreach (@chains) {
-    print "Firewall \"$_\":\n";
-    show_interfaces($_);
-    open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-    show_chain($_, *RENDER{IO});
-    close RENDER;
-    print "-" x 80 . "\n";
+  # Print all rule sets in all four trees
+  foreach $tree (keys %table_hash) {
+    my $description = $description_hash{$tree};
+    $config->setLevel("firewall $tree");
+    @chains = $config->listOrigNodes();
+    foreach (@chains) {
+      print "$description Firewall \"$_\":\n";
+      show_interfaces($_);
+      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+      show_chain($_, *RENDER{IO}, $tree);
+      close RENDER;
+      print "-" x 80 . "\n";
+    }
   }
+  exit 0
 } else {
-  if (scalar(grep(/^$chain_name$/, @chains)) <= 0) {
-    print "Invalid name \"$chain_name\"\n";
-    exit 1;
+  # Look through all four trees trying to find the rule set name passed in
+  foreach $tree (keys %table_hash) {
+    $config->setLevel("firewall $tree");
+    @chains = $config->listOrigNodes();
+    if (scalar(grep(/^$chain_name$/, @chains)) > 0) {
+      # Found it!
+      my $description = $description_hash{$tree};
+      print "$description Firewall \"$chain_name\":\n";
+      show_interfaces($chain_name);
+      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+      show_chain($chain_name, *RENDER{IO}, $tree);
+      close RENDER;
+      exit 0
+    }
   }
-  show_interfaces($chain_name);
-  open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-  show_chain($chain_name, *RENDER{IO});
-  close RENDER;
+  
+  # Didn't find matching rule
+  print "Invalid firewall name \"$chain_name\"\n";
+  exit 1;
 }
 
-exit 0;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# perl-indent-level: 2
+# End:
