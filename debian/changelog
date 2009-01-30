@@ -1,3 +1,12 @@
+vyatta-op-firewall (0.10.4) unstable; urgency=low
+
+  * Fix Bug 1041 Add "clear firewall name <name> rule <number> counters"
+    command
+  * clear out counters for all iptable rules that correspond to a CLI
+    rule
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Fri, 30 Jan 2009 11:17:34 -0800
+
 vyatta-op-firewall (0.10.3) unstable; urgency=low
 
   * Initial support for IPv6.
