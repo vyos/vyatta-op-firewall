@@ -1,0 +1,17 @@
+help: Clear counters for specified rule
+run:
+ firewall_name=$4
+ cli_rule_num=$6
+ result=`sudo /sbin/iptables -L $firewall_name 2>/dev/null`
+ result=`echo $?`
+ if [ $result != 0 ]; then
+  echo Invalid firewall name \'$firewall_name\'
+ else
+  iptables_rule_num=`sudo /sbin/iptables -L $firewall_name -xvn --line-numbers \
+                | grep "/\* $firewall_name-$cli_rule_num " | awk '{ print $1 }'`
+    if [ -n "$iptables_rule_num" ]; then
+      sudo /sbin/iptables -Z "$firewall_name" "$iptables_rule_num"
+    else
+      echo No \'rule $cli_rule_num\' under firewall name \'$firewall_name\'
+    fi
+  fi
