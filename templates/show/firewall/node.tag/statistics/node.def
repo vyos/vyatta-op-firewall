@@ -1,4 +1,0 @@
-help: Show firewall counter information
-run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3" /opt/vyatta/share/xsl/show_firewall_statistics.xsl
-
-

@@ -1,0 +1,2 @@
+help: Show IPv6 firewall counter information
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall_statistics.xsl

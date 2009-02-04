@@ -1,0 +1,7 @@
+help: Show rules for given IPv4 firewall modify chain
+
+allowed:
+     l1=`ls /opt/vyatta/config/active/firewall/modify/ 2>/dev/null`
+     echo $l1
+
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall.xsl

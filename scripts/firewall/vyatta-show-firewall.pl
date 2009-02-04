@@ -6,7 +6,7 @@ use Vyatta::IpTables::Rule;
 use Vyatta::IpTables::AddressFilter;
 
 exit 1 if ($#ARGV < 1);
-my $chain_name = $ARGV[0];
+my $tree_chain = $ARGV[0];
 my $xsl_file = $ARGV[1];
 my $rule_num = $ARGV[2];    # rule number to match (optional)
 
@@ -33,6 +33,7 @@ sub numerically { $a <=> $b; }
 #/serial/node.tag/cisco-hdlc/vif/node.tag/firewall/<dir>/name/node.def
 #/serial/node.tag/frame-relay/vif/node.tag/firewall/<dir>/name/node.def
 #/serial/node.tag/ppp/vif/node.tag/firewall/<dir>/name/node.def
+#/wirelessmodem/node.tag/firewall/<dir>/name/node.def
 
 sub show_interfaces {
   my $chain = shift;
@@ -150,17 +151,30 @@ sub show_chain($$$) {
   print $fh "</format></opcommand>\n";
 }
 
+#
+# main
+#
+
 my $tree;
 my $config = new Vyatta::Config;
 my @chains;
+my @tree_chain_name = split('_', $tree_chain);
+my $tree_name = $tree_chain_name[0];
+my $chain_name = $tree_chain_name[1];
 
-if ($chain_name eq "-all") {
+# check if table-name is either 'all' or one of four keys in %table_hash
+if (!($tree_name eq "all" || (scalar(grep(/^$tree_name$/, (keys %table_hash))) > 0))) {
+ print "Invalid firewall type name [$tree_name]\n";
+ exit 1;
+}
+
+if ($tree_name eq "all") {
   # Print all rule sets in all four trees
-  foreach $tree (keys %table_hash) {
+  foreach $tree (reverse(sort(keys %table_hash))) {
     my $description = $description_hash{$tree};
     $config->setLevel("firewall $tree");
     @chains = $config->listOrigNodes();
-    foreach (@chains) {
+    foreach (sort @chains) {
       print "$description Firewall \"$_\":\n";
       show_interfaces($_);
       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
@@ -169,29 +183,49 @@ if ($chain_name eq "-all") {
       print "-" x 80 . "\n";
     }
   }
-  exit 0
-} else {
-  # Look through all four trees trying to find the rule set name passed in
-  foreach $tree (keys %table_hash) {
+} elsif ($chain_name eq "all") {
+    # Print all rule sets in specified tree
+    $tree = $tree_name;
+    my $description = $description_hash{$tree};
     $config->setLevel("firewall $tree");
     @chains = $config->listOrigNodes();
-    if (scalar(grep(/^$chain_name$/, @chains)) > 0) {
-      # Found it!
-      my $description = $description_hash{$tree};
-      print "$description Firewall \"$chain_name\":\n";
-      show_interfaces($chain_name);
+    foreach (sort @chains) {
+      print "$description Firewall \"$_\":\n";
+      show_interfaces($_);
       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-      show_chain($chain_name, *RENDER{IO}, $tree);
+      show_chain($_, *RENDER{IO}, $tree);
       close RENDER;
-      exit 0
+      print "-" x 80 . "\n";
     }
-  }
-  
-  # Didn't find matching rule
-  print "Invalid firewall name \"$chain_name\"\n";
-  exit 1;
+} else {
+  # Print given rule set in specified tree
+    $tree = $tree_name;
+    $config->setLevel("firewall $tree");
+    @chains = $config->listOrigNodes();
+    # validate chain-name
+    if (!(scalar(grep(/^$chain_name$/, @chains)) > 0)) {
+     print "Invalid firewall instance [$chain_name] \n";
+     exit 1;
+    }
+    if (defined $rule_num) {
+    #validate rule-num for given chain
+     $config->setLevel("firewall $tree $chain_name rule");
+     my @rules = $config->listOrigNodes();
+     if (!(scalar(grep(/^$rule_num$/, @rules)) > 0)) {
+      print "Invalid rule $rule_num under firewall instance [$chain_name] \n";
+      exit 1;
+     }
+    }
+    my $description = $description_hash{$tree};
+    print "$description Firewall \"$chain_name\":\n";
+    show_interfaces($chain_name);
+    open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+    show_chain($chain_name, *RENDER{IO}, $tree);
+    close RENDER;
+    print "-" x 80 . "\n";
 }
 
+exit 0;
 
 # Local Variables:
 # mode: perl

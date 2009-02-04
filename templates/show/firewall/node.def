@@ -1,4 +1,3 @@
 help: Show firewall information
-
-run: ${vyatta_bindir}/vyatta-show-firewall.pl -all /opt/vyatta/share/xsl/show_firewall.xsl
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "all_all" /opt/vyatta/share/xsl/show_firewall.xsl
 

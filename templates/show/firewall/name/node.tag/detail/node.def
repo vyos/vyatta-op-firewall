@@ -1,0 +1,3 @@
+help: Show detailed IPv4 firewall rules information
+
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall_detail.xsl

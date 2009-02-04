@@ -1,0 +1,5 @@
+help: Show summary of IPv4 firewall modify rules
+
+allowed: ls /opt/vyatta/config/active/firewall/modify/${COMP_WORDS[COMP_CWORD-2]}/rule/ 2>/dev/null
+
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall.xsl "$6"
