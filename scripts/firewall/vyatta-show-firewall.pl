@@ -89,6 +89,12 @@ my %description_hash = ( 'name'        => 'IPv4',
                          'ipv6-modify' => 'IPv6 Modify');
 
 
+# mapping from config node to IP version string.
+my %ip_version_hash = ( 'name'        => 'ipv4',
+                        'ipv6-name'   => 'ipv6',
+                        'modify'      => 'ipv4',
+                        'ipv6-modify' => 'ipv6');
+
 sub show_chain($$$) {
   my ($chain, $fh, $tree) = @_;
 
@@ -121,6 +127,7 @@ sub show_chain($$$) {
     my $bytes = shift @stats;
     my $rule = new Vyatta::IpTables::Rule;
     $rule->setupOrig("firewall $tree $chain rule $_");
+    $rule->set_ip_version($ip_version_hash{$tree});
     my $ipt_rules = $rule->get_num_ipt_rules();
     splice(@stats, 0, (($ipt_rules - 1) * 2));
 
@@ -145,6 +152,7 @@ sub show_chain($$$) {
     print $fh "    <bytes>$bytes</bytes>\n";
     my $rule = new Vyatta::IpTables::Rule;
     $rule->setupDummy();
+    $rule->set_ip_version($ip_version_hash{$tree});
     $rule->outputXml($fh);
     print $fh "  </row>\n";
   }
