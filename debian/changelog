@@ -1,3 +1,11 @@
+vyatta-op-firewall (debian/0.10.4-1) unstable; urgency=low
+
+  * modify 'show firewall' hierarchy per config mode cli
+  * set IP version to retrieve correct anywhere address
+  * add the following commands
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Thu, 05 Feb 2009 18:42:11 -0800
+
 vyatta-op-firewall (0.10.4) unstable; urgency=low
 
   * Fix Bug 1041 Add "clear firewall name <name> rule <number> counters"
