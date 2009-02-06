@@ -1,4 +1,4 @@
-vyatta-op-firewall (debian/0.10.4-1) unstable; urgency=low
+vyatta-op-firewall (0.10.4-1) unstable; urgency=low
 
   * modify 'show firewall' hierarchy per config mode cli
   * set IP version to retrieve correct anywhere address
