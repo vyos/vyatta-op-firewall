@@ -4,7 +4,9 @@ xsldir          = @XSLDIR@
 
 xsl_DATA =
 
-bin_SCRIPTS     = scripts/firewall/vyatta-show-firewall.pl
+bin_SCRIPTS 	 =
+bin_SCRIPTS     += scripts/firewall/vyatta-show-firewall.pl
+bin_SCRIPTS     += scripts/firewall/vyatta-clear-firewall
 
 xsl_DATA        += src/xsl/show_firewall_detail.xsl
 xsl_DATA        += src/xsl/show_firewall_statistics_brief.xsl

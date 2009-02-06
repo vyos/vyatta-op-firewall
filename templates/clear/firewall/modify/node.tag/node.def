@@ -1,0 +1,2 @@
+help: Clear firewall rules for a given chain
+allowed: ls /opt/vyatta/config/active/firewall/modify/ 2>/dev/null

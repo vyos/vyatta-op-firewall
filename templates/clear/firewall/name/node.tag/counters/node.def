@@ -1,6 +1,2 @@
 help: Clear firewall counters
-run: sudo /sbin/iptables -Z "$4" 2>/dev/null
-     result=`echo $?`
-     if [ $result != 0 ]; then
-      echo Invalid firewall name \'$4\'
-     fi
+run:  /opt/vyatta/bin/vyatta-clear-firewall "/sbin/iptables" "filter" "$4"

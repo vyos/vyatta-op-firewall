@@ -1,0 +1,2 @@
+help: Clear firewall counters
+run:  /opt/vyatta/bin/vyatta-clear-firewall "/sbin/iptables" "mangle" "$4"

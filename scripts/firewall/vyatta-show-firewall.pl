@@ -142,7 +142,7 @@ sub show_chain($$$) {
     $rule->outputXml($fh);
     print $fh "  </row>\n";
   }
-  if (!defined($rule_num)) {
+  if (!defined($rule_num) || ($rule_num == 1025)) {
     # dummy rule
     print $fh "  <row>\n";
     print $fh "    <rule_number>1025</rule_number>\n";
@@ -219,7 +219,7 @@ if ($tree_name eq "all") {
     #validate rule-num for given chain
      $config->setLevel("firewall $tree $chain_name rule");
      my @rules = $config->listOrigNodes();
-     if (!(scalar(grep(/^$rule_num$/, @rules)) > 0)) {
+     if (!((scalar(grep(/^$rule_num$/, @rules)) > 0) || ($rule_num == 1025))) {
       print "Invalid rule $rule_num under firewall instance [$chain_name] \n";
       exit 1;
      }

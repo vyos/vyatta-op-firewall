@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# Module: vyatta-clear-firewall
+#
+# **** License ****
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# This code was originally developed by Vyatta, Inc.
+# Portions created by Vyatta are Copyright (C) 2006-2009 Vyatta, Inc.
+# All Rights Reserved.
+#
+# Author: Mohit Mehta
+# Date: February 2009
+# Description: Script to clear firewall counters
+#
+# **** End License ****
+#
+
+print_usage()
+{
+    echo "Usage:"
+    echo -e "\t$0 iptables/ip6tables table-name chain-name [rule-num]"
+}
+
+clear_chain() {
+ sudo $iptables_cmd -t $table_name -Z $chain_name 2>/dev/null
+ result=`echo $?`
+ if [ $result != 0 ]; then
+  echo Invalid $ip_version firewall $cli_tree chain \'$chain_name\'
+  exit 1
+ fi
+}
+
+clear_chain_rule() {
+ result=`sudo $iptables_cmd -t $table_name -L $chain_name 2>/dev/null`
+ result=`echo $?`
+ if [ $result != 0 ]; then
+  echo Invalid $ip_version firewall $cli_tree chain \'$chain_name\'
+  exit 1
+ else
+  iptables_rule_num=( `sudo $iptables_cmd -t $table_name -L $chain_name \
+    --line-numbers | grep "/\* $chain_name-$rule_num " | awk '{ print $1 }'` )
+  num_iptables_rules=${#iptables_rule_num[*]}
+  if [ $num_iptables_rules != 0 ]; then
+   i=0
+   while [ $i -lt $num_iptables_rules ]; do
+    sudo $iptables_cmd -t $table_name -Z $chain_name ${iptables_rule_num[$i]}
+    let i++
+   done
+  else
+   echo No \'rule $rule_num\' under $ip_version firewall $cli_tree chain \'$chain_name\'
+   exit 1
+  fi
+ fi
+}
+
+#
+# main
+#
+
+if [ $# -lt 3 ]; then
+ print_usage
+ exit 1
+fi
+
+iptables_cmd=$1
+table_name=$2
+chain_name=$3
+rule_num=$4
+
+if [[ '6' =~ $iptables_cmd ]]; then
+ ip_version="IPv6"
+else
+ ip_version="IPv4"
+fi
+
+if [[ 'filter' =~ $table_name ]]; then
+ cli_tree="name"
+else
+ cli_tree="modify"
+fi
+
+if [ -n "$rule_num" ]; then
+ clear_chain_rule
+else
+ clear_chain
+fi
+
+exit 0
