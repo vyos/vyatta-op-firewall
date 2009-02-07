@@ -74,16 +74,14 @@ iptables_cmd=$1
 table_name=$2
 chain_name=$3
 rule_num=$4
+ip_version="IPv4"
+cli_tree="name"
 
-if [[ '6' =~ $iptables_cmd ]]; then
+if [[ '/sbin/ip6tables' =~ $iptables_cmd ]]; then
  ip_version="IPv6"
-else
- ip_version="IPv4"
 fi
 
-if [[ 'filter' =~ $table_name ]]; then
- cli_tree="name"
-else
+if [[ 'mangle' =~ $table_name ]]; then
  cli_tree="modify"
 fi
 
