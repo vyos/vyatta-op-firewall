@@ -1,3 +1,11 @@
+vyatta-op-firewall (0.10.4-2) unstable; urgency=low
+
+  * add 'show firewall <fw-type> detail' and 'show firewall <fw-type>
+    statistics'
+  * add clear counter commands for ipv6 firewall chain/chain-rule
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Fri, 06 Feb 2009 17:59:43 -0800
+
 vyatta-op-firewall (0.10.4-1) unstable; urgency=low
 
   * modify 'show firewall' hierarchy per config mode cli
