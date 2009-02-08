@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-3) unstable; urgency=low
+
+  * format 'show firewall' output
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Sat, 07 Feb 2009 16:43:23 -0800
+
 vyatta-op-firewall (0.10.4-2) unstable; urgency=low
 
   * add 'show firewall <fw-type> detail' and 'show firewall <fw-type>
