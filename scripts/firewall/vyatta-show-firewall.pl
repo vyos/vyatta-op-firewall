@@ -166,7 +166,7 @@ sub show_chain($$$) {
 my $tree;
 my $config = new Vyatta::Config;
 my @chains;
-my @tree_chain_name = split('_', $tree_chain);
+my @tree_chain_name = split('_', $tree_chain, 2);
 my $tree_name = $tree_chain_name[0];
 my $chain_name = $tree_chain_name[1];
 
