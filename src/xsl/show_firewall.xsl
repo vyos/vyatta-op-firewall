@@ -46,8 +46,7 @@
 
 <xsl:template match="opcommand">
 <xsl:text>&newln;</xsl:text>
-<xsl:text>&newln;</xsl:text>
-<xsl:text>State Codes: E - Established, I - Invalid, N - New, R - Related&newln;</xsl:text>
+<xsl:text>(State Codes: E - Established, I - Invalid, N - New, R - Related)&newln;</xsl:text>
 <xsl:text>&newln;</xsl:text>
 <xsl:text>rule  action  source              destination         proto  state</xsl:text>
 <xsl:text>&newln;</xsl:text>

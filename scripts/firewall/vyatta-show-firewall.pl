@@ -64,9 +64,9 @@ sub show_interfaces {
     }
   }
   if (scalar(@int_strs) > 0) {
-    print "\nActive on " . (join ' ', @int_strs) . "\n";
+    print " Active on " . (join ' ', @int_strs) . "\n";
   } else {
-      print "\nInactive: Not applied to any interfaces.\n";
+      print " Inactive - Not applied to any interfaces.\n";
   }
 }
 
@@ -182,13 +182,16 @@ if ($tree_name eq "all") {
     my $description = $description_hash{$tree};
     $config->setLevel("firewall $tree");
     @chains = $config->listOrigNodes();
+    my $chain_cnt=0;
+    print "-" x 80 . "\n" if (scalar(@chains) > 0);
     foreach (sort @chains) {
-      print "$description Firewall \"$_\":\n";
+      $chain_cnt++;
+      print "$description Firewall \"$_\":";
       show_interfaces($_);
       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
       show_chain($_, *RENDER{IO}, $tree);
       close RENDER;
-      print "-" x 80 . "\n";
+      print "-" x 80 . "\n" if ($chain_cnt < scalar(@chains));
     }
   }
 } elsif ($chain_name eq "all") {
@@ -197,13 +200,16 @@ if ($tree_name eq "all") {
     my $description = $description_hash{$tree};
     $config->setLevel("firewall $tree");
     @chains = $config->listOrigNodes();
+    my $chain_cnt=0;
+    print "-" x 80 . "\n" if (scalar(@chains) > 0);
     foreach (sort @chains) {
-      print "$description Firewall \"$_\":\n";
+      $chain_cnt++;
+      print "$description Firewall \"$_\":";
       show_interfaces($_);
       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
       show_chain($_, *RENDER{IO}, $tree);
+      print "-" x 80 . "\n" if ($chain_cnt < scalar(@chains));
       close RENDER;
-      print "-" x 80 . "\n";
     }
 } else {
   # Print given rule set in specified tree
@@ -225,12 +231,11 @@ if ($tree_name eq "all") {
      }
     }
     my $description = $description_hash{$tree};
-    print "$description Firewall \"$chain_name\":\n";
+    print "\n$description Firewall \"$chain_name\":";
     show_interfaces($chain_name);
     open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
     show_chain($chain_name, *RENDER{IO}, $tree);
     close RENDER;
-    print "-" x 80 . "\n";
 }
 
 exit 0;
