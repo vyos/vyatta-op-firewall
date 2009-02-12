@@ -21,6 +21,8 @@ if (defined($rule_num) && (!($rule_num =~ /^\d+$/) || ($rule_num > 1025))) {
 }
 
 sub numerically { $a <=> $b; }
+my $format1  = "%-5s %-8s %-6s %-8s %-50s";
+my $format2  = "  %-78s";
 
 ### all interfaces firewall nodes
 #/ethernet/node.tag/pppoe/node.tag/firewall/<dir>/name/node.def
@@ -69,6 +71,14 @@ sub show_interfaces {
       print " Inactive - Not applied to any interfaces.\n";
   }
 }
+
+# mapping from iptables/ip6tables target to config action
+my %target_hash = ('RETURN'   => 'accept',
+                   'DROP'     => 'drop',
+                   'QUEUE'    => 'inspect',
+                   'REJECT'   => 'reject',
+                   'DSCP'     => 'modify',
+                   'MARK'     => 'modify');
 
 # mapping from config node to iptables/ip6tables table
 my %table_hash = ( 'name'        => 'filter',
@@ -159,6 +169,161 @@ sub show_chain($$$) {
   print $fh "</format></opcommand>\n";
 }
 
+sub show_chain_detail {
+
+ my ($chain, $tree) = @_;
+ my $table = $table_hash{$tree};
+ my $iptables_cmd = $cmd_hash{$tree};
+
+ my $config = new Vyatta::Config;
+ $config->setLevel("firewall $tree $chain rule");
+ my @rules = sort numerically $config->listOrigNodes();
+ print "\n";
+ printf($format1, 'rule', 'action', 'proto', 'packets', 'bytes');
+ print "\n";
+ printf($format1, '----', '------', '-----', '-------', '-----');
+ foreach (@rules) {
+  my $rule = new Vyatta::IpTables::Rule;
+  $rule->setupOrig("firewall $tree $chain rule $_");
+  if (defined($rule_num) && $rule_num != $_) {
+      next;
+  }
+  next if $rule->is_disabled();
+  print_detail_rule ($iptables_cmd, $table, $chain, $_, $tree);
+ }
+ if (!defined($rule_num) || ($rule_num == 1025)) {
+  # dummy rule
+  print_detail_rule ($iptables_cmd, $table, $chain, 1025, $tree);
+ }
+ print "\n";
+}
+
+sub print_detail_rule {
+ my ($iptables_cmd, $table, $chain, $rule, $tree) = @_;
+ my $string="";
+ my $mul_lines="";
+ 
+ # check from CLI if we have a condition set that creates more than 1 iptable rule
+ # currenly LOG, RECENT in a CLI rule result in more than 1 iptable rule
+ my $cli_rule = new Vyatta::IpTables::Rule;
+ $cli_rule->setupOrig("firewall $tree $chain rule $rule");
+ if ("$cli_rule->{_log}" eq "enable") {
+ 
+  # log enabled in rule so actual rule in iptables is second rule
+  # now get line-num for 1st rule and use line-num+1 to list actual rule
+   $mul_lines=`sudo /sbin/$iptables_cmd -t $table -L $chain -xv --line-num |
+              awk '/$chain-$rule / {print \$0}'`;
+   my @lines = split(/\s+/, $mul_lines, 2);
+   my $line_num = $lines[0] + 1;
+   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+              awk '/$chain-$rule / {print \$0}'`;
+ } elsif (defined($cli_rule->{_recent_time}) || defined($cli_rule->{_recent_cnt})) {
+ 
+  # recent enabled but not log so actual rule in iptables is first rule
+  # now get line-num for 1st rule and use that to list actual rule
+   $mul_lines=`sudo /sbin/$iptables_cmd -t $table -L $chain -xv --line-num |
+              awk '/$chain-$rule / {print \$0}'`;
+   my @lines = split(/\s+/, $mul_lines, 2);
+   my $line_num = $lines[0];
+   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+              awk '/$chain-$rule / {print \$0}'`;
+ } else {
+ 
+   # there's a one-to-one relation between our CLI rule and iptable rule
+   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain -xv |
+              awk '/$chain-$rule / {print \$0}'`;
+ }
+ 
+ my @string_words, @string_words_part1, @string_words_part2, @string_words_part3;
+ @string_words = split (/\s+/, $string, 14);
+ @string_words=splice(@string_words, 1, 13);
+ @string_words_part1=splice(@string_words, 0, 4); # packets, bytes, target, proto
+ $string_words_part1[2]=$target_hash{$string_words_part1[2]};
+ if ($iptables_cmd =~ /6/) {
+  @string_words_part2=splice(@string_words, 2, 2);# source, destination
+ } else {
+  @string_words_part2=splice(@string_words, 3, 2);# source, destination
+ }
+ if ($iptables_cmd =~ /6/) {
+  @string_words_part3=splice(@string_words, 5);# all other matches after comment
+ } else {
+  @string_words_part3=splice(@string_words, 6);# all other matches after comment
+ }
+ my $condition='condition - ';
+ $string_for_part3 = join (" ", @string_words_part3);
+ chomp $string_for_part3;
+ if (!($string_words_part2[1] eq "anywhere")) {
+  $string_for_part3 = "daddr " . $string_words_part2[1] . " " .$string_for_part3;
+ }
+ if (!($string_words_part2[0] eq "anywhere")) {
+  $string_for_part3 = "saddr " . $string_words_part2[0] . " " . $string_for_part3;
+ }
+
+ # make output pretty, replace iptables specific information with CLI related text
+ $string_for_part3 =~ s/ipp2p\s\S+\s/P2P /g;
+ $string_for_part3 =~ s/multiport//g;
+ $string_for_part3 =~ s/recent: UPDATE\s(.+)\sname: DEFAULT side: source /RECENT \2\1 /g;
+ $string_for_part3 =~ s/limit: /LIMIT /g;
+ while ($string_for_part3 =~ m/set\s(\S+)\ssrc\s/) {
+  my $group_type=get_group_type("$1");
+  $string_for_part3 =~ s/set\s(\S+)\ssrc\s/SRC-$group_type-GROUP \1 /;
+ }
+ while ($string_for_part3 =~ m/set\s(\S+)\sdst\s/) {
+  my $group_type=get_group_type("$1");
+  $string_for_part3 =~ s/set\s(\S+)\sdst\s/DST-$group_type-GROUP \1 /;
+ }
+ $string_for_part3 =~ s/policy match dir in pol\s(\S+)\s/IPSEC-MATCH \1 /g;
+ if (defined $cli_rule->{_tcp_flags}) {
+  $string_for_part3 =~ s/tcp flags:(\S+)\s/tcp-flags $cli_rule->{_tcp_flags} /g;
+ }
+ 
+ # add information not displayed when listing the underlying iptable rule
+ if (defined($cli_rule->{_frag})) {
+   $string_for_part3 .= "FRAGMENT match-frag ";
+ } elsif (defined($self->{_non_frag})) {
+   $string_for_part3 .= "FRAGMENT match-non-frag ";
+ }
+ if ("$cli_rule->{_log}" eq "enable") {
+  $string_for_part3 .= "LOG enabled";
+ }
+
+ print "\n";
+ printf($format1, "$rule", "$string_words_part1[2]", "$string_words_part1[3]",
+        "$string_words_part1[0]", "$string_words_part1[1]");
+ print "\n";
+ # print condition
+ if ($string_for_part3 =~ /\w/) {
+    while (length($string_for_part3) > 66) {
+     my $condition_str = substr $string_for_part3, 0 , 66;
+     $condition .= $condition_str;
+     printf($format2, $condition);
+     $condition = '            ';
+     $string_for_part3 = substr $string_for_part3, 66;
+     print "\n";
+    }
+    # print last line which has less than 66 chars
+    $condition .= $string_for_part3;
+    printf($format2, $condition);
+ }
+ print "\n";
+}
+
+sub get_group_type {
+  my $group=shift;
+  my $config = new Vyatta::Config;
+  $config->setLevel("firewall group");
+  my @addr_groups = $config->listOrigNodes("address-group");
+  my @ntwrk_groups = $config->listOrigNodes("network-group");
+  my @port_groups = $config->listOrigNodes("port-group");
+  if (scalar(grep(/^$group$/, @addr_groups)) > 0) {
+   return ("ADDR");
+  } elsif (scalar(grep(/^$group$/, @ntwrk_groups)) > 0) {
+    return ("NTWRK");
+  } elsif (scalar(grep(/^$group$/, @port_groups)) > 0) {
+    return ("PORT");
+  }
+}
+
 #
 # main
 #
@@ -188,9 +353,13 @@ if ($tree_name eq "all") {
       $chain_cnt++;
       print "$description Firewall \"$_\":";
       show_interfaces($_);
-      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-      show_chain($_, *RENDER{IO}, $tree);
-      close RENDER;
+      if (!($xsl_file =~ /detail/)) {
+       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+       show_chain($_, *RENDER{IO}, $tree);
+       close RENDER;
+      } else {
+        show_chain_detail($_, $tree);
+      }
       print "-" x 80 . "\n" if ($chain_cnt < scalar(@chains));
     }
   }
@@ -206,10 +375,14 @@ if ($tree_name eq "all") {
       $chain_cnt++;
       print "$description Firewall \"$_\":";
       show_interfaces($_);
-      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-      show_chain($_, *RENDER{IO}, $tree);
+      if (!($xsl_file =~ /detail/)) {
+       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+       show_chain($_, *RENDER{IO}, $tree);
+       close RENDER;
+      } else {
+        show_chain_detail($_, $tree);
+      }
       print "-" x 80 . "\n" if ($chain_cnt < scalar(@chains));
-      close RENDER;
     }
 } else {
   # Print given rule set in specified tree
@@ -233,9 +406,13 @@ if ($tree_name eq "all") {
     my $description = $description_hash{$tree};
     print "\n$description Firewall \"$chain_name\":";
     show_interfaces($chain_name);
-    open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-    show_chain($chain_name, *RENDER{IO}, $tree);
-    close RENDER;
+    if (!($xsl_file =~ /detail/)) {
+     open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+     show_chain($chain_name, *RENDER{IO}, $tree);
+     close RENDER;
+    } else {
+      show_chain_detail($chain_name, $tree);
+    }
 }
 
 exit 0;
