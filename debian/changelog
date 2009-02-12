@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-5) unstable; urgency=low
+
+  * redo 'show firewall detail' output
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Thu, 12 Feb 2009 14:47:07 -0800
+
 vyatta-op-firewall (0.10.4-4) unstable; urgency=low
 
   * split tree and chain name accurately
