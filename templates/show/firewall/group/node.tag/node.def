@@ -1,0 +1,7 @@
+help: Show IPv4 firewall group
+
+allowed: local -a array
+         array=( /opt/vyatta/config/active/firewall/group/*/* )
+         echo -n ${array[@]##*/}
+
+run: sudo /opt/vyatta/sbin/vyatta-ipset.pl --action=show-set-members --set-name="$4"
