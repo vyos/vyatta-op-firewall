@@ -1,3 +1,10 @@
+vyatta-op-firewall (0.10.4-6) unstable; urgency=low
+
+  * Add "show firewall group".
+  * Add "show firewall group" that shows all groups.
+
+ -- Stig Thormodsrud <stig@io.vyatta.com>  Fri, 13 Feb 2009 20:53:30 -0800
+
 vyatta-op-firewall (0.10.4-5) unstable; urgency=low
 
   * redo 'show firewall detail' output
