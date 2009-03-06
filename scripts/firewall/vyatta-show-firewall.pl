@@ -38,9 +38,9 @@ my $format2  = "  %-78s";
 #/wirelessmodem/node.tag/firewall/<dir>/name/node.def
 
 sub show_interfaces {
-  my $chain = shift;
+  my ($chain, $tree) = @_;
   my $cmd = "find /opt/vyatta/config/active/ "
-            . "|grep -e '/firewall/[^/]\\+/name/node.val'"
+            . "|grep -e '/firewall/[^/]\\+/$tree/node.val'"
             . "| xargs grep -l '^$chain\$'";
   my $ifd;
   return if (!open($ifd, "$cmd |"));
@@ -48,7 +48,7 @@ sub show_interfaces {
   # e.g.,
   #/opt/vyatta/config/active/interfaces/ethernet/eth1/firewall/in/name/node.val
   my $pfx = '/opt/vyatta/config/active/interfaces';
-  my $sfx = '/name/node.val';
+  my $sfx = "/$tree/node.val";
   my @int_strs = ();
   foreach (@ints) {
     my ($intf, $vif, $dir) = (undef, undef, undef);
@@ -335,7 +335,7 @@ my @tree_chain_name = split('_', $tree_chain, 2);
 my $tree_name = $tree_chain_name[0];
 my $chain_name = $tree_chain_name[1];
 
-# check if table-name is either 'all' or one of four keys in %table_hash
+# check if tree name is either 'all' or one of four keys in %table_hash
 if (!($tree_name eq "all" || (scalar(grep(/^$tree_name$/, (keys %table_hash))) > 0))) {
  print "Invalid firewall type name [$tree_name]\n";
  exit 1;
@@ -352,7 +352,7 @@ if ($tree_name eq "all") {
     foreach (sort @chains) {
       $chain_cnt++;
       print "$description Firewall \"$_\":";
-      show_interfaces($_);
+      show_interfaces($_, $tree);
       if (!($xsl_file =~ /detail/)) {
        open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
        show_chain($_, *RENDER{IO}, $tree);
@@ -374,7 +374,7 @@ if ($tree_name eq "all") {
     foreach (sort @chains) {
       $chain_cnt++;
       print "$description Firewall \"$_\":";
-      show_interfaces($_);
+      show_interfaces($_, $tree);
       if (!($xsl_file =~ /detail/)) {
        open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
        show_chain($_, *RENDER{IO}, $tree);
@@ -405,7 +405,7 @@ if ($tree_name eq "all") {
     }
     my $description = $description_hash{$tree};
     print "\n$description Firewall \"$chain_name\":";
-    show_interfaces($chain_name);
+    show_interfaces($chain_name, $tree);
     if (!($xsl_file =~ /detail/)) {
      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
      show_chain($chain_name, *RENDER{IO}, $tree);
