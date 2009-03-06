@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-7) unstable; urgency=low
+
+  * Correctly show interface assignments for rules.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Thu, 05 Mar 2009 17:40:16 -0800
+
 vyatta-op-firewall (0.10.4-6) unstable; urgency=low
 
   * Add "show firewall group".
