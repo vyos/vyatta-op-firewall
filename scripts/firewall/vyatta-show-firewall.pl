@@ -161,7 +161,7 @@ sub show_chain($$$) {
     print $fh "    <pkts>$pkts</pkts>\n";
     print $fh "    <bytes>$bytes</bytes>\n";
     my $rule = new Vyatta::IpTables::Rule;
-    $rule->setupDummy();
+    $rule->setupDummy("firewall $tree $chain");
     $rule->set_ip_version($ip_version_hash{$tree});
     $rule->outputXml($fh);
     print $fh "  </row>\n";
@@ -292,7 +292,7 @@ sub print_detail_rule {
         "$string_words_part1[0]", "$string_words_part1[1]");
  print "\n";
  # print condition
- if ($string_for_part3 =~ /\w/) {
+ if ($string_for_part3 =~ /\w/ and $rule != 1025) {
     while (length($string_for_part3) > 66) {
      my $condition_str = substr $string_for_part3, 0 , 66;
      $condition .= $condition_str;
@@ -324,6 +324,30 @@ sub get_group_type {
   }
 }
 
+sub show_tree {
+  my ($tree, $config, ) = @_;
+
+  my $description = $description_hash{$tree};
+  $config->setLevel("firewall $tree");
+  my @chains = $config->listOrigNodes();
+  my $chain_cnt=0;
+  print "-" x 80 . "\n" if (scalar(@chains) > 0);
+  foreach (sort @chains) {
+    $chain_cnt++;
+    print "$description Firewall \"$_\":";
+    show_interfaces($_, $tree);
+    if (!($xsl_file =~ /detail/)) {
+      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+      show_chain($_, *RENDER{IO}, $tree);
+      close RENDER;
+    } else {
+      show_chain_detail($_, $tree);
+    }
+    print "-" x 80 . "\n" if ($chain_cnt < scalar(@chains));
+  }
+}
+
+
 #
 # main
 #
@@ -344,46 +368,12 @@ if (!($tree_name eq "all" || (scalar(grep(/^$tree_name$/, (keys %table_hash))) >
 if ($tree_name eq "all") {
   # Print all rule sets in all four trees
   foreach $tree (reverse(sort(keys %table_hash))) {
-    my $description = $description_hash{$tree};
-    $config->setLevel("firewall $tree");
-    @chains = $config->listOrigNodes();
-    my $chain_cnt=0;
-    print "-" x 80 . "\n" if (scalar(@chains) > 0);
-    foreach (sort @chains) {
-      $chain_cnt++;
-      print "$description Firewall \"$_\":";
-      show_interfaces($_, $tree);
-      if (!($xsl_file =~ /detail/)) {
-       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-       show_chain($_, *RENDER{IO}, $tree);
-       close RENDER;
-      } else {
-        show_chain_detail($_, $tree);
-      }
-      print "-" x 80 . "\n" if ($chain_cnt < scalar(@chains));
-    }
+    show_tree($tree, $config);
   }
 } elsif ($chain_name eq "all") {
     # Print all rule sets in specified tree
     $tree = $tree_name;
-    my $description = $description_hash{$tree};
-    $config->setLevel("firewall $tree");
-    @chains = $config->listOrigNodes();
-    my $chain_cnt=0;
-    print "-" x 80 . "\n" if (scalar(@chains) > 0);
-    foreach (sort @chains) {
-      $chain_cnt++;
-      print "$description Firewall \"$_\":";
-      show_interfaces($_, $tree);
-      if (!($xsl_file =~ /detail/)) {
-       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
-       show_chain($_, *RENDER{IO}, $tree);
-       close RENDER;
-      } else {
-        show_chain_detail($_, $tree);
-      }
-      print "-" x 80 . "\n" if ($chain_cnt < scalar(@chains));
-    }
+    show_tree($tree, $config);
 } else {
   # Print given rule set in specified tree
     $tree = $tree_name;
