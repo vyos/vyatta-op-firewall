@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-8) unstable; urgency=low
+
+  * Add support for default policy in show firewall commands.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Thu, 09 Apr 2009 14:50:21 -0700
+
 vyatta-op-firewall (0.10.4-7) unstable; urgency=low
 
   * Correctly show interface assignments for rules.
