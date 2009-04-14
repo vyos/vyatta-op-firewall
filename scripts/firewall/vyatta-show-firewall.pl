@@ -4,6 +4,10 @@ use lib "/opt/vyatta/share/perl5/";
 use Vyatta::Config;
 use Vyatta::IpTables::Rule;
 use Vyatta::IpTables::AddressFilter;
+use Vyatta::Zone;
+
+use warnings;
+use strict;
 
 exit 1 if ($#ARGV < 1);
 my $tree_chain = $ARGV[0];
@@ -37,7 +41,7 @@ my $format2  = "  %-78s";
 #/serial/node.tag/ppp/vif/node.tag/firewall/<dir>/name/node.def
 #/wirelessmodem/node.tag/firewall/<dir>/name/node.def
 
-sub show_interfaces {
+sub show_interfaces_zones {
   my ($chain, $tree) = @_;
   my $cmd = "find /opt/vyatta/config/active/ "
             . "|grep -e '/firewall/[^/]\\+/$tree/node.val'"
@@ -66,10 +70,41 @@ sub show_interfaces {
     }
   }
   if (scalar(@int_strs) > 0) {
-    print " Active on " . (join ' ', @int_strs) . "\n";
-  } else {
-      print " Inactive - Not applied to any interfaces.\n";
+    print "\n\n Active on " . (join ' ', @int_strs);
   }
+  print "\n";
+
+  # check if chain used to filter traffic between zones
+  my $used_in_zonefw=0;
+  my @all_zones = Vyatta::Zone::get_all_zones("listOrigNodes");
+  foreach my $zone (sort(@all_zones)) {
+     my @from_zones = Vyatta::Zone::get_from_zones("listOrigNodes", $zone);
+     my @from_zones_using_this_chain=();
+     foreach my $from_zone (sort(@from_zones)) {
+        my $fw_ruleset=Vyatta::Zone::get_firewall_ruleset("returnOrigValue",
+                        $zone, $from_zone, $tree);
+        if (defined $fw_ruleset && $fw_ruleset eq $chain) {
+          push (@from_zones_using_this_chain, $from_zone);
+          if ($used_in_zonefw == 0) {
+            print "\n Active on traffic to -\n";
+            $used_in_zonefw++;
+          }
+        }
+     }
+     if (scalar(@from_zones_using_this_chain) > 0) {
+       my $single_or_multiple_zone = 'zone';
+       if (scalar(@from_zones_using_this_chain) > 1) {
+          $single_or_multiple_zone = 'zones';
+       }
+       my $string_fromzones=join(', ', sort(@from_zones_using_this_chain));
+       print "  zone [$zone] from $single_or_multiple_zone [$string_fromzones]\n";
+     }
+  }
+
+  if ((scalar(@int_strs) == 0) && ($used_in_zonefw == 0)) {
+    print "\n Inactive - Not applied to any interfaces or zones.\n";
+  } 
+  print "\n";
 }
 
 # mapping from iptables/ip6tables target to config action
@@ -207,7 +242,7 @@ sub print_detail_rule {
  # currenly LOG, RECENT in a CLI rule result in more than 1 iptable rule
  my $cli_rule = new Vyatta::IpTables::Rule;
  $cli_rule->setupOrig("firewall $tree $chain rule $rule");
- if ("$cli_rule->{_log}" eq "enable") {
+ if (defined $cli_rule->{_log} && "$cli_rule->{_log}" eq "enable") {
  
   # log enabled in rule so actual rule in iptables is second rule
   # now get line-num for 1st rule and use line-num+1 to list actual rule
@@ -234,7 +269,10 @@ sub print_detail_rule {
               awk '/$chain-$rule / {print \$0}'`;
  }
  
- my @string_words, @string_words_part1, @string_words_part2, @string_words_part3;
+ my @string_words=();
+ my @string_words_part1=();
+ my @string_words_part2=();
+ my @string_words_part3 = ();
  @string_words = split (/\s+/, $string, 14);
  @string_words=splice(@string_words, 1, 13);
  @string_words_part1=splice(@string_words, 0, 4); # packets, bytes, target, proto
@@ -250,7 +288,7 @@ sub print_detail_rule {
   @string_words_part3=splice(@string_words, 6);# all other matches after comment
  }
  my $condition='condition - ';
- $string_for_part3 = join (" ", @string_words_part3);
+ my $string_for_part3 = join (" ", @string_words_part3);
  chomp $string_for_part3;
  if (!($string_words_part2[1] eq "anywhere")) {
   $string_for_part3 = "daddr " . $string_words_part2[1] . " " .$string_for_part3;
@@ -262,17 +300,17 @@ sub print_detail_rule {
  # make output pretty, replace iptables specific information with CLI related text
  $string_for_part3 =~ s/ipp2p\s\S+\s/P2P /g;
  $string_for_part3 =~ s/multiport//g;
- $string_for_part3 =~ s/recent: UPDATE\s(.+)\sname: DEFAULT side: source /RECENT \2\1 /g;
+ $string_for_part3 =~ s/recent: UPDATE\s(.+)\sname: DEFAULT side: source /RECENT $1 /g;
  $string_for_part3 =~ s/limit: /LIMIT /g;
  while ($string_for_part3 =~ m/set\s(\S+)\ssrc\s/) {
   my $group_type=get_group_type("$1");
-  $string_for_part3 =~ s/set\s(\S+)\ssrc\s/SRC-$group_type-GROUP \1 /;
+  $string_for_part3 =~ s/set\s(\S+)\ssrc\s/SRC-$group_type-GROUP $1 /;
  }
  while ($string_for_part3 =~ m/set\s(\S+)\sdst\s/) {
   my $group_type=get_group_type("$1");
-  $string_for_part3 =~ s/set\s(\S+)\sdst\s/DST-$group_type-GROUP \1 /;
+  $string_for_part3 =~ s/set\s(\S+)\sdst\s/DST-$group_type-GROUP $1 /;
  }
- $string_for_part3 =~ s/policy match dir in pol\s(\S+)\s/IPSEC-MATCH \1 /g;
+ $string_for_part3 =~ s/policy match dir in pol\s(\S+)\s/IPSEC-MATCH $1 /g;
  if (defined $cli_rule->{_tcp_flags}) {
   $string_for_part3 =~ s/tcp flags:(\S+)\s/tcp-flags $cli_rule->{_tcp_flags} /g;
  }
@@ -280,10 +318,10 @@ sub print_detail_rule {
  # add information not displayed when listing the underlying iptable rule
  if (defined($cli_rule->{_frag})) {
    $string_for_part3 .= "FRAGMENT match-frag ";
- } elsif (defined($self->{_non_frag})) {
+ } elsif (defined($cli_rule->{_non_frag})) {
    $string_for_part3 .= "FRAGMENT match-non-frag ";
  }
- if ("$cli_rule->{_log}" eq "enable") {
+ if (defined $cli_rule->{_log} && "$cli_rule->{_log}" eq "enable") {
   $string_for_part3 .= "LOG enabled";
  }
 
@@ -335,7 +373,7 @@ sub show_tree {
   foreach (sort @chains) {
     $chain_cnt++;
     print "$description Firewall \"$_\":";
-    show_interfaces($_, $tree);
+    show_interfaces_zones($_, $tree);
     if (!($xsl_file =~ /detail/)) {
       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
       show_chain($_, *RENDER{IO}, $tree);
@@ -395,7 +433,7 @@ if ($tree_name eq "all") {
     }
     my $description = $description_hash{$tree};
     print "\n$description Firewall \"$chain_name\":";
-    show_interfaces($chain_name, $tree);
+    show_interfaces_zones($chain_name, $tree);
     if (!($xsl_file =~ /detail/)) {
      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
      show_chain($chain_name, *RENDER{IO}, $tree);
