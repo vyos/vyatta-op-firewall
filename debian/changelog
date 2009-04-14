@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-9) unstable; urgency=low
+
+  * add zone usage for firewall rulesets in show firewall commands
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Tue, 14 Apr 2009 12:28:08 -0700
+
 vyatta-op-firewall (0.10.4-8) unstable; urgency=low
 
   * Add support for default policy in show firewall commands.
