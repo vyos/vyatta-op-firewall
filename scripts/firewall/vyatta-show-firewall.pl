@@ -163,6 +163,15 @@ sub show_chain($$$) {
   $config->setLevel("firewall $tree $chain rule");
   my @rules = sort numerically $config->listOrigNodes();
   foreach (@rules) {
+    my $rule = new Vyatta::IpTables::Rule;
+    $rule->setupOrig("firewall $tree $chain rule $_");
+    $rule->set_ip_version($ip_version_hash{$tree});
+
+    if (defined($rule_num) && $rule_num != $_) {
+      next;
+    }
+    next if $rule->is_disabled();
+
     # just take the stats from the 1st iptables rule and remove unneeded stats
     # (if this rule corresponds to multiple iptables rules). note that
     # depending on how our rule is translated into multiple iptables rules,
@@ -170,16 +179,9 @@ sub show_chain($$$) {
     # instead of just taking the first pair.
     my $pkts = shift @stats;
     my $bytes = shift @stats;
-    my $rule = new Vyatta::IpTables::Rule;
-    $rule->setupOrig("firewall $tree $chain rule $_");
-    $rule->set_ip_version($ip_version_hash{$tree});
     my $ipt_rules = $rule->get_num_ipt_rules();
     splice(@stats, 0, (($ipt_rules - 1) * 2));
 
-    if (defined($rule_num) && $rule_num != $_) {
-      next;
-    }
-    next if $rule->is_disabled();
     print $fh "  <row>\n";
     print $fh "    <rule_number>$_</rule_number>\n";
     print $fh "    <pkts>$pkts</pkts>\n";
@@ -187,6 +189,7 @@ sub show_chain($$$) {
     $rule->outputXml($fh);
     print $fh "  </row>\n";
   }
+
   if (!defined($rule_num) || ($rule_num == 1025)) {
     # dummy rule
     print $fh "  <row>\n";
