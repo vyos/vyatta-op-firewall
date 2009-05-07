@@ -315,7 +315,7 @@ sub print_detail_rule {
  }
  $string_for_part3 =~ s/policy match dir in pol\s(\S+)\s/IPSEC-MATCH $1 /g;
  if (defined $cli_rule->{_tcp_flags}) {
-  $string_for_part3 =~ s/tcp flags:(\S+)\s/tcp-flags $cli_rule->{_tcp_flags} /g;
+  $string_for_part3 =~ s/flags:(\S+)\s/tcp-flags $cli_rule->{_tcp_flags} /g;
  }
  
  # add information not displayed when listing the underlying iptable rule
