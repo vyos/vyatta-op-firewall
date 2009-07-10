@@ -14,12 +14,14 @@ my $tree_chain = $ARGV[0];
 my $xsl_file = $ARGV[1];
 my $rule_num = $ARGV[2];    # rule number to match (optional)
 
+my $max_rule = 10000;
+
 if (! -e $xsl_file) {
   print "Invalid XSL file \"$xsl_file\"\n";
   exit 1;
 }
 
-if (defined($rule_num) && (!($rule_num =~ /^\d+$/) || ($rule_num > 1025))) {
+if (defined($rule_num) && (!($rule_num =~ /^\d+$/) || ($rule_num > $max_rule))) {
   print "Invalid rule number \"$rule_num\"\n";
   exit 1;
 }
@@ -190,10 +192,10 @@ sub show_chain($$$) {
     print $fh "  </row>\n";
   }
 
-  if (!defined($rule_num) || ($rule_num == 1025)) {
+  if (!defined($rule_num) || ($rule_num == $max_rule)) {
     # dummy rule
     print $fh "  <row>\n";
-    print $fh "    <rule_number>1025</rule_number>\n";
+    print $fh "    <rule_number>$max_rule</rule_number>\n";
     my $pkts = shift @stats;
     my $bytes = shift @stats;
     print $fh "    <pkts>$pkts</pkts>\n";
@@ -229,9 +231,9 @@ sub show_chain_detail {
   next if $rule->is_disabled();
   print_detail_rule ($iptables_cmd, $table, $chain, $_, $tree);
  }
- if (!defined($rule_num) || ($rule_num == 1025)) {
+ if (!defined($rule_num) || ($rule_num == $max_rule)) {
   # dummy rule
-  print_detail_rule ($iptables_cmd, $table, $chain, 1025, $tree);
+  print_detail_rule ($iptables_cmd, $table, $chain, $max_rule, $tree);
  }
  print "\n";
 }
@@ -333,7 +335,7 @@ sub print_detail_rule {
         "$string_words_part1[0]", "$string_words_part1[1]");
  print "\n";
  # print condition
- if ($string_for_part3 =~ /\w/ and $rule != 1025) {
+ if ($string_for_part3 =~ /\w/ and $rule != $max_rule) {
     while (length($string_for_part3) > 66) {
      my $condition_str = substr $string_for_part3, 0 , 66;
      $condition .= $condition_str;
@@ -429,7 +431,8 @@ if ($tree_name eq "all") {
     #validate rule-num for given chain
      $config->setLevel("firewall $tree $chain_name rule");
      my @rules = $config->listOrigNodes();
-     if (!((scalar(grep(/^$rule_num$/, @rules)) > 0) || ($rule_num == 1025))) {
+     if (!((scalar(grep(/^$rule_num$/, @rules)) > 0) || 
+           ($rule_num == $max_rule))) {
       print "Invalid rule $rule_num under firewall instance [$chain_name] \n";
       exit 1;
      }

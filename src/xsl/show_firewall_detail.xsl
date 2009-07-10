@@ -205,7 +205,7 @@
 <xsl:value-of select="log"/>
 
 <xsl:text>&newln;</xsl:text>
-  <xsl:if test="rule_number!='1025'">
+  <xsl:if test="rule_number!='10000'">
     <xsl:text>------------------------</xsl:text>
     <xsl:text>&newln;</xsl:text>
   </xsl:if>
