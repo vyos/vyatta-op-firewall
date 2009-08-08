@@ -35,8 +35,8 @@
 
 <xsl:variable name="pad6" select="'      '"/>
 <xsl:variable name="pad6_len" select="string-length($pad6)"/>
-<xsl:variable name="pad7" select="'       '"/>
-<xsl:variable name="pad7_len" select="string-length($pad7)"/>
+<xsl:variable name="pad10" select="'          '"/>
+<xsl:variable name="pad10_len" select="string-length($pad10)"/>
 <xsl:variable name="pad8" select="'        '"/>
 <xsl:variable name="pad8_len" select="string-length($pad8)"/>
 <xsl:variable name="pad20" select="'                    '"/>
@@ -48,9 +48,9 @@
 <xsl:text>&newln;</xsl:text>
 <xsl:text>(State Codes: E - Established, I - Invalid, N - New, R - Related)&newln;</xsl:text>
 <xsl:text>&newln;</xsl:text>
-<xsl:text>rule  action  source              destination         proto  state</xsl:text>
+<xsl:text>rule  action  source              destination         proto     state</xsl:text>
 <xsl:text>&newln;</xsl:text>
-<xsl:text>----  ------  ------              -----------         -----  ----- </xsl:text>
+<xsl:text>----  ------  ------              -----------         -----     ----- </xsl:text>
 <xsl:text>&newln;</xsl:text>
 
 <xsl:for-each select="format/row">
@@ -104,7 +104,7 @@
   </xsl:choose>
 
 <xsl:value-of select="protocol"/>
-<xsl:value-of select="substring($pad7,1,$pad7_len - string-length(protocol))"/>
+<xsl:value-of select="substring($pad10,1,$pad10_len - string-length(protocol))"/>
 
   <xsl:choose>
     <xsl:when test="contains(state, 'established%2C')">

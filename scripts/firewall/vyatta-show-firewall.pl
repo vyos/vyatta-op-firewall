@@ -27,7 +27,7 @@ if (defined($rule_num) && (!($rule_num =~ /^\d+$/) || ($rule_num > $max_rule))) 
 }
 
 sub numerically { $a <=> $b; }
-my $format1  = "%-5s %-8s %-6s %-8s %-50s";
+my $format1  = "%-5s %-8s %-9s %-8s %-50s";
 my $format2  = "  %-78s";
 
 ### all interfaces firewall nodes
@@ -242,9 +242,10 @@ sub print_detail_rule {
  my ($iptables_cmd, $table, $chain, $rule, $tree) = @_;
  my $string="";
  my $mul_lines="";
+ my $udp_string = undef;
  
  # check from CLI if we have a condition set that creates more than 1 iptable rule
- # currenly LOG, RECENT in a CLI rule result in more than 1 iptable rule
+ # currenly LOG, RECENT, protocol tcp_udp in a CLI rule result in more than 1 iptable rule
  my $cli_rule = new Vyatta::IpTables::Rule;
  $cli_rule->setupOrig("firewall $tree $chain rule $rule");
  if (defined $cli_rule->{_log} && "$cli_rule->{_log}" eq "enable") {
@@ -257,7 +258,19 @@ sub print_detail_rule {
    my $line_num = $lines[0] + 1;
    $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
               awk '/$chain-$rule / {print \$0}'`;
- } elsif (defined($cli_rule->{_recent_time}) || defined($cli_rule->{_recent_cnt})) {
+
+   if (defined $cli_rule->{_protocol} && $cli_rule->{_protocol} eq 'tcp_udp') {
+     # we need the udp rule as well
+     if (defined($cli_rule->{_recent_time}) || defined($cli_rule->{_recent_cnt})) { 
+       $line_num = $line_num + 3;
+     } else {
+       $line_num = $line_num + 2;
+     }
+     $udp_string = `sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+                    awk '/$chain-$rule / {print \$0}'`;
+   }
+ } elsif ( (defined($cli_rule->{_recent_time}) || defined($cli_rule->{_recent_cnt})) ||
+           (defined $cli_rule->{_protocol} && $cli_rule->{_protocol} eq 'tcp_udp') ) {
  
   # recent enabled but not log so actual rule in iptables is first rule
   # now get line-num for 1st rule and use that to list actual rule
@@ -267,6 +280,17 @@ sub print_detail_rule {
    my $line_num = $lines[0];
    $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
               awk '/$chain-$rule / {print \$0}'`;
+     
+   # we need the udp rule as well         
+   if (defined($cli_rule->{_recent_time}) || defined($cli_rule->{_recent_cnt})) {
+     $line_num = $line_num + 2;
+     $udp_string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+              awk '/$chain-$rule / {print \$0}'`;
+   } else {
+     $line_num = $line_num + 1;
+     $udp_string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+              awk '/$chain-$rule / {print \$0}'`;
+   }
  } else {
  
    # there's a one-to-one relation between our CLI rule and iptable rule
@@ -281,7 +305,21 @@ sub print_detail_rule {
  @string_words = split (/\s+/, $string, 14);
  @string_words=splice(@string_words, 1, 13);
  @string_words_part1=splice(@string_words, 0, 4); # packets, bytes, target, proto
- $string_words_part1[2]=$target_hash{$string_words_part1[2]};
+ 
+ if (defined $cli_rule->{_protocol} && $cli_rule->{_protocol} eq 'tcp_udp') {
+   $string_words_part1[3] = 'tcp_udp';
+   
+   # get udp rule packets, bytes
+   my @udp_string_words=split(/\s+/, $udp_string, 14);
+   @udp_string_words=splice(@udp_string_words, 1, 13);
+   @udp_string_words=splice(@udp_string_words, 0, 4); # packets, bytes, target, proto
+   $string_words_part1[0] += $udp_string_words[0];
+   $string_words_part1[1] += $udp_string_words[1];
+ }
+ 
+ $string_words_part1[2]=$cli_rule->{_action} if defined $cli_rule->{_action};
+ $string_words_part1[2]='drop' if $rule == $max_rule;
+ 
  if ($iptables_cmd =~ /6/) {
   @string_words_part2=splice(@string_words, 2, 2);# source, destination
  } else {
