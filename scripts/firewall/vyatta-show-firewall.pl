@@ -26,8 +26,26 @@ if (defined($rule_num) && (!($rule_num =~ /^\d+$/) || ($rule_num > $max_rule))) 
   exit 1;
 }
 
+sub convert_to_easyunits {
+  my $size = shift;
+  my @args = qw/B K M G T P E Z Y/;
+
+  while (@args && $size > 1000) {
+    shift @args;
+    $size /= 1000;
+  }
+
+  if ($args[0] eq 'B') {
+    $size = sprintf("%d",$size);
+    return "$size";
+  } else {
+    $size = sprintf("%.2f",$size);
+    return "$size$args[0]";
+  }
+}
+
 sub numerically { $a <=> $b; }
-my $format1  = "%-5s %-8s %-9s %-8s %-50s";
+my $format1  = "%-5s %-8s %-9s %-8s %-40s";
 my $format2  = "  %-78s";
 
 ### all interfaces firewall nodes
@@ -149,7 +167,7 @@ sub show_chain($$$) {
   my $iptables_cmd = $cmd_hash{$tree};
 
   open my $iptables, "-|"
-      or exec "sudo", "/sbin/$iptables_cmd", "-t", $table, "-L", $chain, "-vn"
+      or exec "sudo", "/sbin/$iptables_cmd", "-t", $table, "-L", $chain, "-vnx"
       or exit 1;
   my @stats = ();
   while (<$iptables>) {
@@ -178,12 +196,26 @@ sub show_chain($$$) {
     # (if this rule corresponds to multiple iptables rules). note that
     # depending on how our rule is translated into multiple iptables rules,
     # this may actually need to be the sum of all corresponding iptables stats
-    # instead of just taking the first pair.
+    # instead of just taking the first pair. for eg: when protocol is tcp_udp
+    # we aggregate the counters for both tcp and udp rules below
     my $pkts = shift @stats;
     my $bytes = shift @stats;
+    if (defined $rule->{_protocol} && $rule->{_protocol} eq 'tcp_udp') {
+      my @tmp_stats = @stats;
+      if (defined $rule->{_log} && $rule->{_log} eq 'enable') {      
+        # shift stats for 2 iptables rule
+        shift @tmp_stats; shift @tmp_stats; shift @tmp_stats; shift @tmp_stats;
+      } elsif (defined $rule->{_recent_time} || defined $rule->{_recent_cnt}) {
+        # shift stats for 1 rule
+        shift @tmp_stats; shift @tmp_stats;
+      } 
+      $pkts += shift @tmp_stats;
+      $bytes += shift @tmp_stats;
+    }
     my $ipt_rules = $rule->get_num_ipt_rules();
     splice(@stats, 0, (($ipt_rules - 1) * 2));
-
+    $pkts = convert_to_easyunits($pkts);
+    $bytes = convert_to_easyunits($bytes);
     print $fh "  <row>\n";
     print $fh "    <rule_number>$_</rule_number>\n";
     print $fh "    <pkts>$pkts</pkts>\n";
@@ -196,8 +228,8 @@ sub show_chain($$$) {
     # dummy rule
     print $fh "  <row>\n";
     print $fh "    <rule_number>$max_rule</rule_number>\n";
-    my $pkts = shift @stats;
-    my $bytes = shift @stats;
+    my $pkts = convert_to_easyunits(shift @stats);
+    my $bytes = convert_to_easyunits(shift @stats);
     print $fh "    <pkts>$pkts</pkts>\n";
     print $fh "    <bytes>$bytes</bytes>\n";
     my $rule = new Vyatta::IpTables::Rule;
