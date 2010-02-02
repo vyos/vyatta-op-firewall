@@ -1,3 +1,12 @@
+vyatta-op-firewall (0.10.4-16) unstable; urgency=low
+
+  * Fix Bug 4998 Firewall ruleset being used by IDS is reported as not
+    applied
+  * use OrigValue so that this works when show command is run outside of
+    config mode
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Mon, 01 Feb 2010 18:42:49 -0800
+
 vyatta-op-firewall (0.10.4-15) unstable; urgency=low
 
   * Fix 'show firewall statistics' command for protocol tcp_udp
