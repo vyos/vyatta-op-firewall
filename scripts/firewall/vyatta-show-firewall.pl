@@ -125,7 +125,7 @@ sub show_interfaces_zones {
   my $custom_filter = 0;
   my $config = new Vyatta::Config;
   $config->setLevel("content-inspection traffic-filter");
-  my $custom_traffic_filter = $config->returnValue('custom');
+  my $custom_traffic_filter = $config->returnOrigValue('custom');
   if ((defined $custom_traffic_filter) && ($custom_traffic_filter eq $chain)) {
     $custom_filter = 1;
     print "\n Active on all incoming and forwarded traffic for content-inspection\n";
