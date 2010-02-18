@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-16+kenwood1) unstable; urgency=low
+
+  * UNRELEASED
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Wed, 17 Feb 2010 16:08:28 -0800
+
 vyatta-op-firewall (0.10.4-16) unstable; urgency=low
 
   * Fix Bug 4998 Firewall ruleset being used by IDS is reported as not
