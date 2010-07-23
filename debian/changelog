@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-18) unstable; urgency=low
+
+  * UNRELEASED
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Thu, 22 Jul 2010 17:25:08 -0700
+
 vyatta-op-firewall (0.10.4-17) unstable; urgency=low
 
   * UNRELEASED
