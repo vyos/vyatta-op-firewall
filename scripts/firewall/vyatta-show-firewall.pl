@@ -2,6 +2,7 @@
 
 use lib "/opt/vyatta/share/perl5/";
 use Vyatta::Config;
+use Vyatta::Interface;
 use Vyatta::IpTables::Rule;
 use Vyatta::IpTables::AddressFilter;
 use Vyatta::Zone;
@@ -48,45 +49,19 @@ sub numerically { $a <=> $b; }
 my $format1  = "%-5s %-8s %-9s %-8s %-40s";
 my $format2  = "  %-78s";
 
-### all interfaces firewall nodes
-#/ethernet/node.tag/pppoe/node.tag/firewall/<dir>/name/node.def
-#/ethernet/node.tag/vif/node.tag/firewall/<dir>/name/node.def
-#/ethernet/node.tag/firewall/<dir>/name/node.def
-#/adsl/node.tag/pvc/node.tag/pppoa/node.tag/firewall/<dir>/name/node.def
-#/adsl/node.tag/pvc/node.tag/pppoe/node.tag/firewall/<dir>/name/node.def
-#/adsl/node.tag/pvc/node.tag/classical-ipoa/firewall/<dir>/name/node.def
-#/tunnel/node.tag/firewall/<dir>/name/node.def
-#/serial/node.tag/cisco-hdlc/vif/node.tag/firewall/<dir>/name/node.def
-#/serial/node.tag/frame-relay/vif/node.tag/firewall/<dir>/name/node.def
-#/serial/node.tag/ppp/vif/node.tag/firewall/<dir>/name/node.def
-#/wirelessmodem/node.tag/firewall/<dir>/name/node.def
-
 sub show_interfaces_zones {
   my ($chain, $tree) = @_;
-  my $cmd = "find /opt/vyatta/config/active/ "
-            . "|grep -e '/firewall/[^/]\\+/$tree/node.val'"
-            . "| xargs grep -l '^$chain\$'";
-  my $ifd;
-  return if (!open($ifd, "$cmd |"));
-  my @ints = <$ifd>;
-  # e.g.,
-  #/opt/vyatta/config/active/interfaces/ethernet/eth1/firewall/in/name/node.val
-  my $pfx = '/opt/vyatta/config/active/interfaces';
-  my $sfx = "/$tree/node.val";
+
+  my $cfg = new Vyatta::Config;
   my @int_strs = ();
-  foreach (@ints) {
-    my ($intf, $vif, $dir) = (undef, undef, undef);
-    if (/^$pfx\/[^\/]+\/([^\/]+)(\/.*)?\/firewall\/([^\/]+)$sfx$/) {
-      ($intf, $dir) = ($1, $3);
-      $dir =~ y/a-z/A-Z/;
-    } else {
-      next;
-    }
-    if (/\/vif\/([^\/]+)\/firewall\//) {
-      $vif = $1;
-      push @int_strs, "($intf.$vif,$dir)";
-    } else {
-      push @int_strs, "($intf,$dir)";
+  for (Vyatta::Interface::get_all_cfg_interfaces(1)) {
+    my ($iname, $ipath) = ($_->{name}, $_->{path});
+    for my $dir ($cfg->listOrigNodes("$ipath firewall")) {
+      my $ichain = $cfg->returnOrigValue("$ipath firewall $dir $tree");
+      if (defined($ichain) and $ichain eq $chain) {
+        $dir =~ y/a-z/A-Z/;
+        push @int_strs, "($iname,$dir)";
+      }
     }
   }
   if (scalar(@int_strs) > 0) {
