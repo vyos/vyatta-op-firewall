@@ -1,2 +1,4 @@
 help: Clear firewall rules for a given chain
-allowed: ls /opt/vyatta/config/active/firewall/ipv6-name/ 2>/dev/null
+allowed: local -a vals
+         eval "vals=($(cli-shell-api listActiveNodes firewall ipv6-name))"
+         echo -n ${vals[@]}

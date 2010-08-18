@@ -1,7 +1,7 @@
 help: Show rules for given IPv4 firewall chain
 
-allowed:
-     l1=`ls /opt/vyatta/config/active/firewall/name/ 2>/dev/null`
-     echo $l1
+allowed: local -a vals
+         eval "vals=($(cli-shell-api listActiveNodes firewall name))"
+         echo -n ${vals[@]}
 
 run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall.xsl

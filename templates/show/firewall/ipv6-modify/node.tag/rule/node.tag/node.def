@@ -1,5 +1,8 @@
 help: Show summary of IPv6 firewall modify rules
 
-allowed: ls /opt/vyatta/config/active/firewall/ipv6-modify/${COMP_WORDS[COMP_CWORD-2]}/rule/ 2>/dev/null
+allowed: local -a vals
+         eval "vals=($(cli-shell-api listActiveNodes \
+                       firewall ipv6-modify ${COMP_WORDS[COMP_CWORD-2]} rule))"
+         echo -n ${vals[@]}
 
 run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall.xsl "$6"

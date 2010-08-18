@@ -1,7 +1,11 @@
 help: Show IPv4 firewall group
 
-allowed: local -a array
-         array=( /opt/vyatta/config/active/firewall/group/*/* )
-         echo -n ${array[@]##*/}
+allowed: local -a gtypes
+         local -a nodes
+         eval "gtypes=($(cli-shell-api listActiveNodes firewall group))"
+         for g in "${gtypes[@]}"; do
+           eval "nodes=($(cli-shell-api listActiveNodes firewall group $g))"
+           echo -n "${nodes[@]}" ' '
+         done
 
 run: sudo /opt/vyatta/sbin/vyatta-ipset.pl --action=show-set-members --set-name="$4"
