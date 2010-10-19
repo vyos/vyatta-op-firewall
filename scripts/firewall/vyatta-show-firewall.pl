@@ -116,7 +116,7 @@ sub show_interfaces_zones {
 # mapping from iptables/ip6tables target to config action
 my %target_hash = ('RETURN'   => 'accept',
                    'DROP'     => 'drop',
-                   'QUEUE'    => 'inspect',
+                   'NFQUEUE'  => 'inspect',
                    'REJECT'   => 'reject',
                    'DSCP'     => 'modify',
                    'MARK'     => 'modify');
