@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-22) unstable; urgency=low
+
+  * Change QUEUE to NFQUEUE.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Tue, 19 Oct 2010 14:49:41 -0700
+
 vyatta-op-firewall (0.10.4-21) unstable; urgency=low
 
   * UNRELEASED
