@@ -1,3 +1,10 @@
+vyatta-op-firewall (0.10.4-24) unstable; urgency=low
+
+  * Fix 5163: 'show firewall' displays misleading output when firewall
+    groups are used
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Mon, 29 Nov 2010 15:59:04 -0800
+
 vyatta-op-firewall (0.10.4-23) unstable; urgency=low
 
   * Fix Debian package warnings
