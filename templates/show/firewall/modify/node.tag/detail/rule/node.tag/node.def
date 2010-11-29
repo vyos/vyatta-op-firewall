@@ -1,8 +1,0 @@
-help: Show detailed information for specified IPv4 firewall modify rule
-
-allowed: local -a vals
-         eval "vals=($(cli-shell-api listActiveNodes \
-                         firewall modify ${COMP_WORDS[COMP_CWORD-3]} rule))"
-         echo -n ${vals[@]}
-
-run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall_detail.xsl "$7"

@@ -1,2 +1,2 @@
 help: Show IPv6 firewall chains
-run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_all" /opt/vyatta/share/xsl/show_firewall.xsl
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_all" /opt/vyatta/share/xsl/show_firewall_detail.xsl

@@ -265,7 +265,12 @@ sub print_detail_rule {
  # check from CLI if we have a condition set that creates more than 1 iptable rule
  # currenly LOG, RECENT, protocol tcp_udp in a CLI rule result in more than 1 iptable rule
  my $cli_rule = new Vyatta::IpTables::Rule;
- $cli_rule->setupOrig("firewall $tree $chain rule $rule");
+ if ($rule eq $max_rule) {
+   $cli_rule->setupDummy("firewall $tree $chain");
+   $cli_rule->set_ip_version($ip_version_hash{$tree});
+ } else {
+   $cli_rule->setupOrig("firewall $tree $chain rule $rule");
+ }
  if (defined $cli_rule->{_log} && "$cli_rule->{_log}" eq "enable") {
  
   # log enabled in rule so actual rule in iptables is second rule
@@ -336,17 +341,18 @@ sub print_detail_rule {
  }
  
  $string_words_part1[2]=$cli_rule->{_action} if defined $cli_rule->{_action};
- $string_words_part1[2]='drop' if $rule == $max_rule;
  
  if ($iptables_cmd =~ /6/) {
   @string_words_part2=splice(@string_words, 2, 2);# source, destination
  } else {
   @string_words_part2=splice(@string_words, 3, 2);# source, destination
  }
- if ($iptables_cmd =~ /6/) {
-  @string_words_part3=splice(@string_words, 5);# all other matches after comment
- } else {
-  @string_words_part3=splice(@string_words, 6);# all other matches after comment
+ if ($rule != $max_rule) {
+  if ($iptables_cmd =~ /6/) {
+   @string_words_part3=splice(@string_words, 5);# all other matches after comment
+  } else {
+   @string_words_part3=splice(@string_words, 6);# all other matches after comment
+  }
  }
  my $condition='condition - ';
  my $string_for_part3 = join (" ", @string_words_part3);
@@ -391,7 +397,7 @@ sub print_detail_rule {
         "$string_words_part1[0]", "$string_words_part1[1]");
  print "\n";
  # print condition
- if ($string_for_part3 =~ /\w/ and $rule != $max_rule) {
+ if ($string_for_part3 =~ /\w/) {
     while (length($string_for_part3) > 66) {
      my $condition_str = substr $string_for_part3, 0 , 66;
      $condition .= $condition_str;

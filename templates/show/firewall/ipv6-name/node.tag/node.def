@@ -4,4 +4,4 @@ allowed: local -a vals
          eval "vals=($(cli-shell-api listActiveNodes firewall ipv6-name))"
          echo -n ${vals[@]}
 
-run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall.xsl
+run: ${vyatta_bindir}/vyatta-show-firewall.pl "$3_$4" /opt/vyatta/share/xsl/show_firewall_detail.xsl
