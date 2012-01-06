@@ -452,6 +452,59 @@ sub show_tree {
   }
 }
 
+sub print_global_fw_header {
+  print "\n" . "-" x 24 . "\n";
+  print "Firewall Global Settings\n";
+  print "-" x 24 . "\n";
+}
+
+sub print_fw_ruleset_header {
+  print "\n" . "-" x 29 . "\n";
+  print "Firewall Rulesets Information\n";
+  print "-" x 29 . "\n";
+}
+
+sub show_state_policy {
+
+  my $state_format = "%-15s %-8s %-8s";
+  my @fw_states = ('invalid', 'established', 'related');
+  my $fw_state_output = "";
+  my $fw_state_set = "false";
+  foreach my $state (@fw_states) {
+    my $config = new Vyatta::Config;
+    $config->setLevel("firewall state-policy $state");
+    my ($action, $log_enabled) = (undef, undef);
+    $log_enabled = $config->existsOrig("log enable");
+    $action = $config->returnOrigValue("action");
+    if (defined $action) {
+      $fw_state_set = "true";
+      last;
+    }
+
+  }
+
+  if ($fw_state_set eq "true") {
+    print_global_fw_header();
+    print "\nFirewall state-policy for all IPv4 and Ipv6 traffic\n\n";
+    printf($state_format, 'state', 'action', 'log');
+    print "\n";
+    printf($state_format, '-----', '------', '---');
+    foreach my $state (@fw_states) {
+      my $config = new Vyatta::Config;
+      $config->setLevel("firewall state-policy $state");
+      my ($action, $log_enabled) = (undef, undef);
+      $log_enabled = $config->existsOrig("log enable");
+      $action = $config->returnOrigValue("action");
+      if (defined $action) {
+        print "\n";
+        printf($state_format, "$state", "$action", 'enabled') if defined $log_enabled;
+        printf($state_format, "$state", "$action", 'disabled') if !defined $log_enabled;
+      }
+    }
+    print "\n\n";
+  }
+  return;
+}
 
 #
 # main
@@ -471,11 +524,15 @@ if (!($tree_name eq "all" || (scalar(grep(/^$tree_name$/, (keys %table_hash))) >
 }
 
 if ($tree_name eq "all") {
+  show_state_policy();
+  print_fw_ruleset_header();
   # Print all rule sets in all four trees
   foreach $tree (reverse(sort(keys %table_hash))) {
     show_tree($tree, $config);
   }
 } elsif ($chain_name eq "all") {
+    show_state_policy();
+    print_fw_ruleset_header();
     # Print all rule sets in specified tree
     $tree = $tree_name;
     show_tree($tree, $config);
@@ -499,6 +556,8 @@ if ($tree_name eq "all") {
       exit 1;
      }
     }
+    show_state_policy();
+    print_fw_ruleset_header();
     my $description = $description_hash{$tree};
     print "\n$description Firewall \"$chain_name\":";
     show_interfaces_zones($chain_name, $tree);
