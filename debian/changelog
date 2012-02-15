@@ -1,3 +1,10 @@
+vyatta-op-firewall (0.10.4-28) unstable; urgency=low
+
+  * Bugfix 7778: Add 'show firewall summary' command and setup summary
+    info for webgui dashboard
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 14 Feb 2012 19:17:28 -0800
+
 vyatta-op-firewall (0.10.4-27) unstable; urgency=low
 
   * change 'show firewall' output to show state-policy settings (if
