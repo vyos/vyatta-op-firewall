@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-29) unstable; urgency=low
+
+  * Cleanup 'show firewall summary'
+
+ -- John Southworth <john.southworth@vyatta.com>  Wed, 15 Feb 2012 09:11:44 -0800
+
 vyatta-op-firewall (0.10.4-28) unstable; urgency=low
 
   * Bugfix 7778: Add 'show firewall summary' command and setup summary
