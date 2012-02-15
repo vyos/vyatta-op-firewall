@@ -1,0 +1,2 @@
+help: Show summary of firewall application
+run: sudo ${vyatta_bindir}/sudo-users/vyatta-show-firewall-summary.pl
