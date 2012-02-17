@@ -13,13 +13,13 @@ use warnings;
 use strict;
 
 sub show_interfaces_zones {
-  my ($chain, $tree) = @_;
+  my ($chain, $tree, $cfg, $cfg_ifs) = @_;
+  $cfg->setLevel("");
   my $outhash = {};
-  my $cfg = new Vyatta::Config;
   my @int_strs = ();
   my @zone_strs = ();
   my $content_str = "";
-  for (Vyatta::Interface::get_all_cfg_interfaces(1)) {
+  for (@{$cfg_ifs}) {
     my ($iname, $ipath) = ($_->{name}, $_->{path});
     for my $dir ($cfg->listOrigNodes("$ipath firewall")) {
       my $ichain = $cfg->returnOrigValue("$ipath firewall $dir $tree");
@@ -60,7 +60,7 @@ sub show_interfaces_zones {
 
   # check if content-inspection is using this ruleset
   my $custom_filter = 0;
-  my $config = new Vyatta::Config;
+  my $config = $cfg;
   $config->setLevel("content-inspection traffic-filter");
   my $custom_traffic_filter = $config->returnOrigValue('custom');
   if ((defined $custom_traffic_filter) && ($custom_traffic_filter eq $chain)) {
@@ -78,28 +78,29 @@ my %description_hash = ( 'name'        => 'IPv4',
                          'ipv6-modify' => 'IPv6 Modify');
 
 sub show_tree {
-  my ($tree, $config, ) = @_;
+  my ($tree, $config) = @_;
   my $tree_hash = {};
+  my @cfg_ifs = Vyatta::Interface::get_all_cfg_interfaces(1);
   my $description = $description_hash{$tree};
   $config->setLevel("firewall $tree");
   my @chains = $config->listOrigNodes();
   my $chain_cnt=0;
   foreach (sort @chains) {
     $chain_cnt++;
-    $tree_hash->{$_}->{references} = show_interfaces_zones($_, $tree);
+    $tree_hash->{$_}->{references} = show_interfaces_zones($_, $tree, $config, \@cfg_ifs);
     $tree_hash->{$_}->{description} = $config->returnOrigValue("$_ description");
   }
   return $tree_hash;
 }
 
 sub show_state_policy {
+  my ($config) = @_;
   my $outhash = {};
   my $state_format = "%-15s %-8s %-8s";
   my @fw_states = ('invalid', 'established', 'related');
   my $fw_state_output = "";
   my $fw_state_set = "false";
   foreach my $state (@fw_states) {
-    my $config = new Vyatta::Config;
     $config->setLevel("firewall state-policy $state");
     my ($action, $log_enabled) = (undef, undef);
     $log_enabled = $config->existsOrig("log enable");
@@ -113,7 +114,6 @@ sub show_state_policy {
 
   if ($fw_state_set eq "true") {
     foreach my $state (@fw_states) {
-      my $config = new Vyatta::Config;
       $config->setLevel("firewall state-policy $state");
       my ($action, $log_enabled) = (undef, undef);
       $log_enabled = $config->existsOrig("log enable");
@@ -132,7 +132,7 @@ sub get_firewall_summary {
   my $hash = {};
   foreach my $tree (reverse(sort(keys %description_hash))) {
     $hash->{$tree} = show_tree($tree, $config);
-    $hash->{global} = show_state_policy();
+    $hash->{global} = show_state_policy($config);
   }
   return $hash;
 }
