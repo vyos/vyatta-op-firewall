@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-30) unstable; urgency=low
+
+  * Optimize firewall summary command library
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 17 Feb 2012 15:29:10 -0800
+
 vyatta-op-firewall (0.10.4-29) unstable; urgency=low
 
   * Cleanup 'show firewall summary'
