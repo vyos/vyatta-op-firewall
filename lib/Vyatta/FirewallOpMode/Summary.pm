@@ -88,6 +88,7 @@ sub show_tree {
   foreach (sort @chains) {
     $chain_cnt++;
     $tree_hash->{$_}->{references} = show_interfaces_zones($_, $tree, $config, \@cfg_ifs);
+    $config->setLevel("firewall $tree");
     $tree_hash->{$_}->{description} = $config->returnOrigValue("$_ description");
   }
   return $tree_hash;
