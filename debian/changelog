@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-31) unstable; urgency=low
+
+  * Bugfix 7830: fix config level problem
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 27 Feb 2012 13:43:54 -0800
+
 vyatta-op-firewall (0.10.4-30) unstable; urgency=low
 
   * Optimize firewall summary command library
