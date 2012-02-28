@@ -275,11 +275,11 @@ sub print_detail_rule {
  
   # log enabled in rule so actual rule in iptables is second rule
   # now get line-num for 1st rule and use line-num+1 to list actual rule
-   $mul_lines=`sudo /sbin/$iptables_cmd -t $table -L $chain -xv --line-num |
+   $mul_lines=`sudo /sbin/$iptables_cmd -t $table -L $chain -nxv --line-num |
               awk '/$chain-$rule / {print \$0}'`;
    my @lines = split(/\s+/, $mul_lines, 2);
    my $line_num = $lines[0] + 1;
-   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -nxv |
               awk '/$chain-$rule / {print \$0}'`;
 
    if (defined $cli_rule->{_protocol} && $cli_rule->{_protocol} eq 'tcp_udp') {
@@ -289,7 +289,7 @@ sub print_detail_rule {
      } else {
        $line_num = $line_num + 2;
      }
-     $udp_string = `sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+     $udp_string = `sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -nxv |
                     awk '/$chain-$rule / {print \$0}'`;
    }
  } elsif ( (defined($cli_rule->{_recent_time}) || defined($cli_rule->{_recent_cnt})) ||
@@ -297,27 +297,27 @@ sub print_detail_rule {
  
   # recent enabled but not log so actual rule in iptables is first rule
   # now get line-num for 1st rule and use that to list actual rule
-   $mul_lines=`sudo /sbin/$iptables_cmd -t $table -L $chain -xv --line-num |
+   $mul_lines=`sudo /sbin/$iptables_cmd -t $table -L $chain -nxv --line-num |
               awk '/$chain-$rule / {print \$0}'`;
    my @lines = split(/\s+/, $mul_lines, 2);
    my $line_num = $lines[0];
-   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -nxv |
               awk '/$chain-$rule / {print \$0}'`;
      
    # we need the udp rule as well         
    if (defined($cli_rule->{_recent_time}) || defined($cli_rule->{_recent_cnt})) {
      $line_num = $line_num + 2;
-     $udp_string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+     $udp_string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -nxv |
               awk '/$chain-$rule / {print \$0}'`;
    } else {
      $line_num = $line_num + 1;
-     $udp_string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -xv |
+     $udp_string=`sudo /sbin/$iptables_cmd -t $table -L $chain $line_num -nxv |
               awk '/$chain-$rule / {print \$0}'`;
    }
  } else {
  
    # there's a one-to-one relation between our CLI rule and iptable rule
-   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain -xv |
+   $string=`sudo /sbin/$iptables_cmd -t $table -L $chain -nxv |
               awk '/$chain-$rule / {print \$0}'`;
  }
  
