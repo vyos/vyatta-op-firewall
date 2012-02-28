@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-32) unstable; urgency=low
+
+  * Bugfix 6870: don't use reverse dns on firewall rules
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 28 Feb 2012 12:39:28 -0800
+
 vyatta-op-firewall (0.10.4-31) unstable; urgency=low
 
   * Bugfix 7830: fix config level problem
