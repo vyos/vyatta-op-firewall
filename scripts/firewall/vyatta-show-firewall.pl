@@ -357,12 +357,8 @@ sub print_detail_rule {
  my $condition='condition - ';
  my $string_for_part3 = join (" ", @string_words_part3);
  chomp $string_for_part3;
- if (!($string_words_part2[1] eq "anywhere")) {
-  $string_for_part3 = "daddr " . $string_words_part2[1] . " " .$string_for_part3;
- }
- if (!($string_words_part2[0] eq "anywhere")) {
-  $string_for_part3 = "saddr " . $string_words_part2[0] . " " . $string_for_part3;
- }
+ $string_for_part3 = "daddr " . $string_words_part2[1] . " " .$string_for_part3;
+ $string_for_part3 = "saddr " . $string_words_part2[0] . " " . $string_for_part3;
 
  # make output pretty, replace iptables specific information with CLI related text
  $string_for_part3 =~ s/ipp2p\s\S+\s/P2P /g;
