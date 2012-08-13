@@ -54,7 +54,7 @@ sub show_interfaces_zones {
 
   my $cfg = new Vyatta::Config;
   my @int_strs = ();
-  for (Vyatta::Interface::get_all_cfg_interfaces(1)) {
+  for (Vyatta::Interface::get_effective_interfaces()) {
     my ($iname, $ipath) = ($_->{name}, $_->{path});
     for my $dir ($cfg->listOrigNodes("$ipath firewall")) {
       my $ichain = $cfg->returnOrigValue("$ipath firewall $dir $tree");

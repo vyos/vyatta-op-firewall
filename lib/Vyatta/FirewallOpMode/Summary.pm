@@ -80,7 +80,7 @@ my %description_hash = ( 'name'        => 'IPv4',
 sub show_tree {
   my ($tree, $config) = @_;
   my $tree_hash = {};
-  my @cfg_ifs = Vyatta::Interface::get_all_cfg_interfaces(1);
+  my @cfg_ifs = Vyatta::Interface::get_effective_interfaces();
   my $description = $description_hash{$tree};
   $config->setLevel("firewall $tree");
   my @chains = $config->listOrigNodes();
