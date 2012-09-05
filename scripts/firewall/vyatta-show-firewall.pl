@@ -49,6 +49,12 @@ sub numerically { $a <=> $b; }
 my $format1  = "%-5s %-8s %-9s %-8s %-40s";
 my $format2  = "  %-78s";
 
+# mapping from config node to root config node. 
+my %root_hash = ( 'name'        => 'firewall',
+                  'ipv6-name'   => 'firewall',
+                  'route'       => 'policy',
+                  'ipv6-route'  => 'policy');
+                  
 sub show_interfaces_zones {
   my ($chain, $tree) = @_;
 
@@ -56,8 +62,14 @@ sub show_interfaces_zones {
   my @int_strs = ();
   for (Vyatta::Interface::get_effective_interfaces()) {
     my ($iname, $ipath) = ($_->{name}, $_->{path});
-    for my $dir ($cfg->listOrigNodes("$ipath firewall")) {
-      my $ichain = $cfg->returnOrigValue("$ipath firewall $dir $tree");
+    for my $dir ($cfg->listOrigNodes("$ipath $root_hash{$tree}")) {
+      my $path;
+      if ($tree eq 'route' || $tree eq 'ipv6-route') {
+        $path = "$ipath $root_hash{$tree} $dir";
+      } else {
+        $path = "$ipath $root_hash{$tree} $dir $tree";
+      }
+      my $ichain = $cfg->returnOrigValue("$path");
       if (defined($ichain) and $ichain eq $chain) {
         $dir =~ y/a-z/A-Z/;
         push @int_strs, "($iname,$dir)";
@@ -124,27 +136,27 @@ my %target_hash = ('RETURN'   => 'accept',
 # mapping from config node to iptables/ip6tables table
 my %table_hash = ( 'name'        => 'filter',
                    'ipv6-name'   => 'filter',
-                   'modify'      => 'mangle',
-                   'ipv6-modify' => 'mangle' );
+                   'route'       => 'mangle',
+                   'ipv6-route'  => 'mangle' );
 
 # mapping from config node to iptables command. 
 my %cmd_hash = ( 'name'        => 'iptables',
                  'ipv6-name'   => 'ip6tables',
-                 'modify'      => 'iptables',
-                 'ipv6-modify' => 'ip6tables');
-
+                 'route'       => 'iptables',
+                 'ipv6-route'  => 'ip6tables');
+                 
 # mapping from config node to printable string describing it.
-my %description_hash = ( 'name'        => 'IPv4',
-                         'ipv6-name'   => 'IPv6',
-                         'modify'      => 'IPv4 Modify',
-                         'ipv6-modify' => 'IPv6 Modify');
+my %description_hash = ( 'name'        => 'IPv4 Firewall',
+                         'ipv6-name'   => 'IPv6 Firewall',
+                         'route'       => 'IPv4 Policy Route',
+                         'ipv6-route'  => 'IPv6 Policy Route');
 
 
 # mapping from config node to IP version string.
 my %ip_version_hash = ( 'name'        => 'ipv4',
                         'ipv6-name'   => 'ipv6',
-                        'modify'      => 'ipv4',
-                        'ipv6-modify' => 'ipv6');
+                        'route'       => 'ipv4',
+                        'ipv6-route'  => 'ipv6');
 
 sub show_chain($$$) {
   my ($chain, $fh, $tree) = @_;
@@ -166,11 +178,11 @@ sub show_chain($$$) {
 
   print $fh "<opcommand name='firewallrules'><format type='row'>\n";
   my $config = new Vyatta::Config;
-  $config->setLevel("firewall $tree $chain rule");
+  $config->setLevel("$root_hash{$tree} $tree $chain rule");
   my @rules = sort numerically $config->listOrigNodes();
   foreach (@rules) {
     my $rule = new Vyatta::IpTables::Rule;
-    $rule->setupOrig("firewall $tree $chain rule $_");
+    $rule->setupOrig("$root_hash{$tree} $tree $chain rule $_");
     $rule->set_ip_version($ip_version_hash{$tree});
 
     if (defined($rule_num) && $rule_num != $_) {
@@ -219,7 +231,7 @@ sub show_chain($$$) {
     print $fh "    <pkts>$pkts</pkts>\n";
     print $fh "    <bytes>$bytes</bytes>\n";
     my $rule = new Vyatta::IpTables::Rule;
-    $rule->setupDummy("firewall $tree $chain");
+    $rule->setupDummy("$root_hash{$tree} $tree $chain");
     $rule->set_ip_version($ip_version_hash{$tree});
     $rule->outputXml($fh);
     print $fh "  </row>\n";
@@ -234,7 +246,7 @@ sub show_chain_detail {
  my $iptables_cmd = $cmd_hash{$tree};
 
  my $config = new Vyatta::Config;
- $config->setLevel("firewall $tree $chain rule");
+ $config->setLevel("$root_hash{$tree} $tree $chain rule");
  my @rules = sort numerically $config->listOrigNodes();
  print "\n";
  printf($format1, 'rule', 'action', 'proto', 'packets', 'bytes');
@@ -242,7 +254,7 @@ sub show_chain_detail {
  printf($format1, '----', '------', '-----', '-------', '-----');
  foreach (@rules) {
   my $rule = new Vyatta::IpTables::Rule;
-  $rule->setupOrig("firewall $tree $chain rule $_");
+  $rule->setupOrig("$root_hash{$tree} $tree $chain rule $_");
   if (defined($rule_num) && $rule_num != $_) {
       next;
   }
@@ -266,10 +278,10 @@ sub print_detail_rule {
  # currenly LOG, RECENT, protocol tcp_udp in a CLI rule result in more than 1 iptable rule
  my $cli_rule = new Vyatta::IpTables::Rule;
  if ($rule eq $max_rule) {
-   $cli_rule->setupDummy("firewall $tree $chain");
+   $cli_rule->setupDummy("$root_hash{$tree} $tree $chain");
    $cli_rule->set_ip_version($ip_version_hash{$tree});
  } else {
-   $cli_rule->setupOrig("firewall $tree $chain rule $rule");
+   $cli_rule->setupOrig("$root_hash{$tree} $tree $chain rule $rule");
  }
  if (defined $cli_rule->{_log} && "$cli_rule->{_log}" eq "enable") {
  
@@ -339,8 +351,12 @@ sub print_detail_rule {
    $string_words_part1[0] += $udp_string_words[0];
    $string_words_part1[1] += $udp_string_words[1];
  }
- 
- $string_words_part1[2]=$cli_rule->{_action} if defined $cli_rule->{_action};
+
+ if (defined $cli_rule->{_action}) {
+  $string_words_part1[2]=$cli_rule->{_action};
+ } else {
+  $string_words_part1[2]='set';
+ }
  
  if ($iptables_cmd =~ /6/) {
   @string_words_part2=splice(@string_words, 2, 2);# source, destination
@@ -391,6 +407,7 @@ sub print_detail_rule {
  print "\n";
  printf($format1, "$rule", "$string_words_part1[2]", "$string_words_part1[3]",
         "$string_words_part1[0]", "$string_words_part1[1]");
+ 
  print "\n";
  # print condition
  if ($string_for_part3 =~ /\w/) {
@@ -429,13 +446,13 @@ sub show_tree {
   my ($tree, $config, ) = @_;
 
   my $description = $description_hash{$tree};
-  $config->setLevel("firewall $tree");
+  $config->setLevel("$root_hash{$tree} $tree");
   my @chains = $config->listOrigNodes();
   my $chain_cnt=0;
   print "-" x 80 . "\n" if (scalar(@chains) > 0);
   foreach (sort @chains) {
     $chain_cnt++;
-    print "$description Firewall \"$_\":";
+    print "$description \"$_\":";
     show_interfaces_zones($_, $tree);
     if (!($xsl_file =~ /detail/)) {
       open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
@@ -456,7 +473,7 @@ sub print_global_fw_header {
 
 sub print_fw_ruleset_header {
   print "\n" . "-" x 29 . "\n";
-  print "Firewall Rulesets Information\n";
+  print "Rulesets Information\n";
   print "-" x 29 . "\n";
 }
 
@@ -514,8 +531,9 @@ my $tree_name = $tree_chain_name[0];
 my $chain_name = $tree_chain_name[1];
 
 # check if tree name is either 'all' or one of four keys in %table_hash
-if (!($tree_name eq "all" || (scalar(grep(/^$tree_name$/, (keys %table_hash))) > 0))) {
- print "Invalid firewall type name [$tree_name]\n";
+if (!($tree_name eq "all" || (scalar(grep(/^$tree_name$/, (keys %table_hash))) > 0)
+      || $tree_name eq "firewall" || $tree_name eq "policy")) {
+ print "Invalid $root_hash{$tree} type name [$tree_name]\n";
  exit 1;
 }
 
@@ -526,6 +544,16 @@ if ($tree_name eq "all") {
   foreach $tree (reverse(sort(keys %table_hash))) {
     show_tree($tree, $config);
   }
+} elsif ($tree_name eq "firewall") {
+  show_state_policy();
+  print_fw_ruleset_header();
+  show_tree('name', $config);
+  show_tree('ipv6-name', $config);
+} elsif ($tree_name eq "policy") {
+  show_state_policy();
+  print_fw_ruleset_header();
+  show_tree('route', $config);
+  show_tree('ipv6-route', $config);
 } elsif ($chain_name eq "all") {
     show_state_policy();
     print_fw_ruleset_header();
@@ -535,27 +563,27 @@ if ($tree_name eq "all") {
 } else {
   # Print given rule set in specified tree
     $tree = $tree_name;
-    $config->setLevel("firewall $tree");
+    $config->setLevel("$root_hash{$tree} $tree");
     @chains = $config->listOrigNodes();
     # validate chain-name
     if (!(scalar(grep(/^$chain_name$/, @chains)) > 0)) {
-     print "Invalid firewall instance [$chain_name] \n";
+     print "Invalid $root_hash{$tree} instance [$chain_name] \n";
      exit 1;
     }
     if (defined $rule_num) {
     #validate rule-num for given chain
-     $config->setLevel("firewall $tree $chain_name rule");
+     $config->setLevel("$root_hash{$tree} $tree $chain_name rule");
      my @rules = $config->listOrigNodes();
      if (!((scalar(grep(/^$rule_num$/, @rules)) > 0) || 
            ($rule_num == $max_rule))) {
-      print "Invalid rule $rule_num under firewall instance [$chain_name] \n";
+      print "Invalid rule $rule_num under $root_hash{$tree} instance [$chain_name] \n";
       exit 1;
      }
     }
     show_state_policy();
     print_fw_ruleset_header();
     my $description = $description_hash{$tree};
-    print "\n$description Firewall \"$chain_name\":";
+    print "\n$description \"$chain_name\":";
     show_interfaces_zones($chain_name, $tree);
     if (!($xsl_file =~ /detail/)) {
      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;

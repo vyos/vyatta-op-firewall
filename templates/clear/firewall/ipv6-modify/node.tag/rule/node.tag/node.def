@@ -1,5 +1,0 @@
-help: Clear firewall statistics for given rule
-allowed: local -a vals
-         eval "vals=($(cli-shell-api listActiveNodes \
-                       firewall ipv6-modify ${COMP_WORDS[COMP_CWORD-2]} rule))"
-         echo -n ${vals[@]}

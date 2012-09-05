@@ -1,4 +1,0 @@
-help: Clear firewall rules for a given chain
-allowed: local -a vals
-         eval "vals=($(cli-shell-api listActiveNodes firewall modify))"
-         echo -n ${vals[@]}

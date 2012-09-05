@@ -1,0 +1,4 @@
+help: Clear policy rules for a given chain
+allowed: local -a vals
+         eval "vals=($(cli-shell-api listActiveNodes policy route))"
+         echo -n ${vals[@]}
