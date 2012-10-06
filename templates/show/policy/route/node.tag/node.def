@@ -1,4 +1,4 @@
-help: Show rules for given IPv4 firewall modify chain
+help: Show rules for given IPv4 policy route 
 
 allowed: local -a vals
          eval "vals=($(cli-shell-api listActiveNodes firewall modify))"

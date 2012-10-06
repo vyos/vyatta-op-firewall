@@ -1,4 +1,4 @@
-help: Show rules for given IPv6 firewall modify chain
+help: Show rules for given IPv6 policy route 
 
 allowed: local -a vals
          eval "vals=($(cli-shell-api listActiveNodes firewall ipv6-modify))"

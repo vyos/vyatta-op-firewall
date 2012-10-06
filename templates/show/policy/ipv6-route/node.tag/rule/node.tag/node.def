@@ -1,4 +1,4 @@
-help: Show summary of IPv6 firewall modify rules
+help: Show summary of IPv6 policy rule 
 
 allowed: local -a vals
          eval "vals=($(cli-shell-api listActiveNodes \

@@ -33,7 +33,7 @@ clear_chain() {
  sudo $iptables_cmd -t $table_name -Z $chain_name 2>/dev/null
  result=`echo $?`
  if [ $result != 0 ]; then
-  echo Invalid $ip_version firewall $cli_tree chain \'$chain_name\'
+  echo Invalid $ip_version $cli_root $cli_tree instance \'$chain_name\'
   exit 1
  fi
 }
@@ -42,7 +42,7 @@ clear_chain_rule() {
  result=`sudo $iptables_cmd -t $table_name -L $chain_name 2>/dev/null`
  result=`echo $?`
  if [ $result != 0 ]; then
-  echo Invalid $ip_version firewall $cli_tree chain \'$chain_name\'
+  echo Invalid $ip_version $cli_root $cli_tree instance \'$chain_name\'
   exit 1
  else
   iptables_rule_num=( `sudo $iptables_cmd -t $table_name -L $chain_name \
@@ -55,7 +55,7 @@ clear_chain_rule() {
     let i++
    done
   else
-   echo No \'rule $rule_num\' under $ip_version firewall $cli_tree chain \'$chain_name\'
+   echo No \'rule $rule_num\' under $ip_version $cli_root $cli_tree instance \'$chain_name\'
    exit 1
   fi
  fi
@@ -76,13 +76,15 @@ chain_name=$3
 rule_num=$4
 ip_version="IPv4"
 cli_tree="name"
+cli_root="firewall"
 
 if [[ '/sbin/ip6tables' =~ $iptables_cmd ]]; then
  ip_version="IPv6"
 fi
 
 if [[ 'mangle' =~ $table_name ]]; then
- cli_tree="modify"
+ cli_root="policy"
+ cli_tree="route"
 fi
 
 if [ -n "$rule_num" ]; then
