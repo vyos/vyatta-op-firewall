@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-37) unstable; urgency=low
+
+  * PBR op commands: a clean up and fixes for 8349, 8334
+
+ -- susheela <susheela.vaidya@vyatta.com>  Sat, 06 Oct 2012 14:59:23 -0700
+
 vyatta-op-firewall (0.10.4-36) unstable; urgency=low
 
   * add show command support for policy rules
