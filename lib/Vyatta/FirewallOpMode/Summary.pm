@@ -58,16 +58,6 @@ sub show_interfaces_zones {
   }
   $outhash->{'zones'} = \@zone_strs;
 
-  # check if content-inspection is using this ruleset
-  my $custom_filter = 0;
-  my $config = $cfg;
-  $config->setLevel("content-inspection traffic-filter");
-  my $custom_traffic_filter = $config->returnOrigValue('custom');
-  if ((defined $custom_traffic_filter) && ($custom_traffic_filter eq $chain)) {
-    $custom_filter = 1;
-    $content_str = "Active on all incoming and forwarded traffic for content-inspection";
-  }
-  $outhash->{'content-inspection'} = $content_str;
   return $outhash; 
 }
 
