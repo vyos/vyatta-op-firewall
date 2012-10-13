@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-38+pacifica2) unstable; urgency=low
+
+  * new branch
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 12 Oct 2012 18:49:22 -0700
+
 vyatta-op-firewall (0.10.4-38+pacifica1) unstable; urgency=low
 
   * new branch
