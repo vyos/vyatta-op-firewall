@@ -1,0 +1,2 @@
+help: reset a firewall group 
+run: /opt/vyatta/bin/sudo-users/vyatta-ipset.pl --action=reset-set --set-name=all  
