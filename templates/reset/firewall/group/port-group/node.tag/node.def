@@ -1,2 +1,3 @@
 help: reset a firewall group 
+allowed: /opt/vyatta/sbin/vyatta-ipset.pl --action="show-port-groups"
 run: /opt/vyatta/bin/sudo-users/vyatta-ipset.pl --action=reset-set --set-name=$5 --set-type="port"
