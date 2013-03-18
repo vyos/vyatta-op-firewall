@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.10.4-39+daisy3) unstable; urgency=low
+
+  * Fix 8516: help string
+
+ -- Gaurav Sinha <gaurav.sinha@vyatta.com>  Mon, 18 Mar 2013 16:57:53 -0700
+
 vyatta-op-firewall (0.10.4-39+daisy2) unstable; urgency=low
 
   [ root ]
