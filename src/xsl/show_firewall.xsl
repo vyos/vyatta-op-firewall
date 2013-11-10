@@ -33,6 +33,8 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+<xsl:output omit-xml-declaration="yes" />
+
 <xsl:variable name="pad6" select="'      '"/>
 <xsl:variable name="pad6_len" select="string-length($pad6)"/>
 <xsl:variable name="pad10" select="'          '"/>
