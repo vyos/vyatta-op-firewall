@@ -444,7 +444,7 @@ sub show_tree {
     print "$description \"$_\":";
     show_interfaces_zones($_, $tree);
     if (!($xsl_file =~ /detail/)) {
-      open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+      open(RENDER, "| /usr/bin/xsltproc $xsl_file -") or exit 1;
       show_chain($_, *RENDER{IO}, $tree);
       close RENDER;
     } else {
@@ -575,7 +575,7 @@ if ($tree_name eq "all") {
     print "\n$description \"$chain_name\":";
     show_interfaces_zones($chain_name, $tree);
     if (!($xsl_file =~ /detail/)) {
-     open(RENDER, "| /opt/vyatta/sbin/render_xml $xsl_file") or exit 1;
+     open(RENDER, "| /usr/bin/xsltproc $xsl_file -") or exit 1;
      show_chain($chain_name, *RENDER{IO}, $tree);
      close RENDER;
     } else {
