@@ -1,3 +1,17 @@
+vyatta-op-firewall (0.11.0+hydrogen2) unstable; urgency=low
+
+  * Add omit-xml-declaration to XSLs to prevent XSLT processors from
+  * Replace the sablotron-based XSLT processor with xsltproc.
+  * Remove dependency on vyatta-op-xml.
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 10 Nov 2013 16:59:04 +0100
+
+vyatta-op-firewall (0.11.0+hydrogen1) unstable; urgency=low
+
+  * Fix branch name
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 10 Nov 2013 00:00:00 +0100
+
 vyatta-op-firewall (0.10.4-39+daisy3) unstable; urgency=low
 
   * Fix 8516: help string
