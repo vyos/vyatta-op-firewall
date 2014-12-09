@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.11.0+vyos2+lithium1) unstable; urgency=low
+
+  * New branch
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Tue, 09 Dec 2014 22:24:02 +0000
+ 
 vyatta-op-firewall (0.11.0+vyos1+helium1) unstable; urgency=low
 
   * New branch
