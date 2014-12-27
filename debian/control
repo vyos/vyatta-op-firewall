@@ -1,7 +1,7 @@
 Source: vyatta-op-firewall
 Section: contrib/net
 Priority: extra
-Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
+Maintainer: VyOS Package Maintainers <maintainers@vyos.net>
 Build-Depends: debhelper (>= 5), autotools-dev
 Standards-Version: 3.7.2
 
@@ -16,5 +16,5 @@ Suggests: util-linux (>= 2.13-5),
  ethtool,
  ncurses-bin (>= 5.5-5),
  ntpdate
-Description: Vyatta operational commands for firewall.
- This package contains Vyatta operational commands for firewalling.
+Description: VyOS operational commands for firewall.
+ This package contains VyOS operational commands for firewalling.
