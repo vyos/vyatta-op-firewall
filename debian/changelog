@@ -1,3 +1,9 @@
+vyatta-op-firewall (0.11.0+vyos2+lithium3) unstable; urgency=low
+
+  * vyatta-op-firewall: update dh_gencontrol with new development flag
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Fri, 19 Jun 2015 20:32:37 +0100
+ 
 vyatta-op-firewall (0.11.0+vyos2+lithium2) unstable; urgency=low
 
   * Update maintainer address
