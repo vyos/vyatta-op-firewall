@@ -326,16 +326,19 @@ sub print_detail_rule {
  my @string_words_part1=();
  my @string_words_part2=();
  my @string_words_part3 = ();
- @string_words = split (/\s+/, $string, 14);
- @string_words=splice(@string_words, 1, 13);
+
+ # trim leading and trailing whitespaces
+ $string =~ s/^\s+|\s+$//g;
+ @string_words = split (/\s+/, $string, 13);
  @string_words_part1=splice(@string_words, 0, 4); # packets, bytes, target, proto
  
  if (defined $cli_rule->{_protocol} && $cli_rule->{_protocol} eq 'tcp_udp') {
    $string_words_part1[3] = 'tcp_udp';
    
+   # trim leading and trailing whitespaces
+   $udp_string =~ s/^\s+|\s+$//g;
    # get udp rule packets, bytes
-   my @udp_string_words=split(/\s+/, $udp_string, 14);
-   @udp_string_words=splice(@udp_string_words, 1, 13);
+   my @udp_string_words=split(/\s+/, $udp_string, 13);
    @udp_string_words=splice(@udp_string_words, 0, 4); # packets, bytes, target, proto
    $string_words_part1[0] += $udp_string_words[0];
    $string_words_part1[1] += $udp_string_words[1];
