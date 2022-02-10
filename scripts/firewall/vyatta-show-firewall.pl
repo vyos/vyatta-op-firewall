@@ -15,7 +15,7 @@ my $tree_chain = $ARGV[0];
 my $xsl_file = $ARGV[1];
 my $rule_num = $ARGV[2];    # rule number to match (optional)
 
-my $max_rule = 10000;
+my $max_rule = 1000000;
 
 if (! -e $xsl_file) {
   print "Invalid XSL file \"$xsl_file\"\n";
