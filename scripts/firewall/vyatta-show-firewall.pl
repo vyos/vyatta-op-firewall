@@ -46,7 +46,7 @@ sub convert_to_easyunits {
 }
 
 sub numerically { $a <=> $b; }
-my $format1  = "%-5s %-8s %-9s %-8s %-40s";
+my $format1  = "%-9s %-8s %-9s %-8s %-40s";
 my $format2  = "  %-78s";
 
 # mapping from config node to root config node. 
