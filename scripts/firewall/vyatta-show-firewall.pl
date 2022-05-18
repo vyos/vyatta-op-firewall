@@ -46,7 +46,7 @@ sub convert_to_easyunits {
 }
 
 sub numerically { $a <=> $b; }
-my $format1  = "%-5s %-8s %-9s %-8s %-40s";
+my $format1  = "%-9s %-8s %-9s %-8s %-40s";
 my $format2  = "  %-78s";
 
 # mapping from config node to root config node. 
@@ -329,6 +329,8 @@ sub print_detail_rule {
 
  # trim leading and trailing whitespaces
  $string =~ s/^\s+|\s+$//g;
+ # Hide comments like /* foo-20 */ T2194
+ $string =~ s/\/\* $chain-$rule \*\///;
  @string_words = split (/\s+/, $string, 13);
  @string_words_part1=splice(@string_words, 0, 4); # packets, bytes, target, proto
  
@@ -359,7 +361,7 @@ sub print_detail_rule {
   if ($iptables_cmd =~ /6/) {
    @string_words_part3=splice(@string_words, 5);# all other matches after comment
   } else {
-   @string_words_part3=splice(@string_words, 6);# all other matches after comment
+   @string_words_part3=splice(@string_words, 3);# all other matches after comment
   }
  }
  my $condition='condition - ';
